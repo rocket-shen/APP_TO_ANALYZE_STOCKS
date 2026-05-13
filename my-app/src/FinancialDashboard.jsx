@@ -79,88 +79,88 @@ const FinancialDashboard = () => {
       };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 font-sans text-slate-900">
-      {/* 搜索 */}
-      <SearchBar
-        onSearch={handleSearch}
-        onSync={handleSync}
-        symbol={symbol}
-        loading={loading}
-        error={error}
-      />
+  <div className="min-h-screen bg-[#0a0f1c] text-slate-200 font-sans">
+    {/* 全局背景網格（可選，更有終端感） */}
+    <div className="fixed inset-0 bg-[linear-gradient(to_right,#1a2333_1px,transparent_1px),linear-gradient(to_bottom,#1a2333_1px,transparent_1px)] bg-[size:40px_40px] opacity-40 pointer-events-none" />
 
-      {/* 行情头部 */}
+    <div className="relative p-6 max-w-7xl mx-auto">
+      {/* 搜索欄區域 */}
+      <div className="mb-8">
+        <SearchBar
+          onSearch={handleSearch}
+          onSync={handleSync}
+          symbol={symbol}
+          loading={loading}
+          error={error}
+        />
+      </div>
+
+      {/* 行情頭部 + 快速連結 */}
       {quote && (
-        <div className="max-w-6xl mx-auto">
-          <DashboardHeader
-            quote={quote}
-          />
-          <div className="mt-4 mb-6 flex gap-3">
-            <a 
+        <div className="glass-panel mb-8 p-6 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40 shadow-2xl shadow-cyan-500/10">
+          <DashboardHeader quote={quote} />
+
+          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <a
               href={`https://so.eastmoney.com/web/s?keyword=${symbol}`}
-              className="flex-1 text-center px-4 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
+              className="glass-button flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 text-cyan-400 hover:text-white rounded-xl transition-all duration-200"
             >
-              东方财富{quote.name ? ` - ${quote.name}` : ''}
+              东方财富
             </a>
-
-            <a 
+            <a
               href={`https://www.cninfo.com.cn/new/fulltextSearch?notautosubmit=&keyWord=${symbol}`}
-              className="flex-1 text-center px-4 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg transition-colors"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
+              className="glass-button flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 text-cyan-400 hover:text-white rounded-xl transition-all duration-200"
             >
-              巨潮资讯{quote.name ? ` - ${quote.name}` : ''}
+              巨潮资讯
             </a>
-
-            <a 
+            <a
               href={`https://stockpage.10jqka.com.cn/${symbol}`}
-              className="flex-1 text-center px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
+              className="glass-button flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 text-cyan-400 hover:text-white rounded-xl transition-all duration-200"
             >
-              同花顺资讯{quote.name ? ` - ${quote.name}` : ''}
+              同花顺
             </a>
-
-            <a 
+            <a
               href={`https://xueqiu.com/k?q=${symbol}`}
-              className="flex-1 text-center px-4 py-3 bg-sky-500 hover:bg-sky-600 text-white rounded-lg transition-colors"
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
+              className="glass-button flex items-center justify-center gap-2 px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-cyan-400/50 text-cyan-400 hover:text-white rounded-xl transition-all duration-200"
             >
-              雪球资讯{quote.name ? ` - ${quote.name}` : ''}
+              雪球
             </a>
           </div>
         </div>
       )}
 
-      {/* 同步引导区域：仅在没有数据且触发了 showSync 时显示 */}
+      {/* 同步提示卡片 */}
       {showSync && data.length === 0 && (
-        <div className="max-w-md mx-auto mt-8 p-6 bg-white border border-slate-100 rounded-xl shadow-sm text-center animate-in fade-in zoom-in duration-300">
-          <div className="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Download className="w-6 h-6" />
+        <div className="glass-panel max-w-md mx-auto mt-12 p-8 text-center border border-white/10 backdrop-blur-2xl bg-black/60 shadow-xl shadow-cyan-900/30 rounded-3xl">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-orange-500/20 flex items-center justify-center border border-cyan-400/30">
+            <Download className="w-8 h-8 text-cyan-400" />
           </div>
-          <h3 className="text-lg font-bold text-slate-800 mb-2">未发现本地数据</h3>
-          <p className="text-slate-500 text-sm mb-6">
-            数据库中暂无股票 <span className="font-mono font-bold text-blue-600">{symbol}</span> 的历史财报。
+          <h3 className="text-2xl font-semibold mb-3 text-white">未發現本地數據</h3>
+          <p className="text-slate-400 mb-8">
+            資料庫中暫無 <span className="font-mono text-cyan-400 font-bold">{symbol}</span> 的歷史財報
           </p>
           <button
             onClick={handleSync}
             disabled={loading}
-            className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white font-medium px-4 py-3 rounded-lg shadow-md flex items-center justify-center gap-2 transition-all"
+            className="w-full py-4 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-medium rounded-2xl shadow-lg shadow-cyan-500/50 transition-all active:scale-[0.985]"
           >
-            {loading ? "正在同步抓取..." : "立即从云端同步数据"}
+            {loading ? "正在從雲端同步..." : "立即同步抓取數據"}
           </button>
         </div>
       )}
 
-      
-
+      {/* 圖表區域 */}
       {data.length > 0 && (
-        <div className="max-w-6xl mx-auto animate-in fade-in duration-500">
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="glass-panel p-6 rounded-3xl border border-white/10 backdrop-blur-xl bg-black/40 shadow-2xl shadow-black/80">
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
             <AssetTrendChart data={data} />
             <CurrentAssetChart data={data} />
             <RevenueChart data={data} />
@@ -175,7 +175,8 @@ const FinancialDashboard = () => {
         </div>
       )}
     </div>
-  );
+  </div>
+);
 };
 
 export default FinancialDashboard;

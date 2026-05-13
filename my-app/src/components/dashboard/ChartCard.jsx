@@ -9,24 +9,30 @@ import { ResponsiveContainer } from 'recharts';
  */
 const ChartCard = ({ title, children, Icon }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow group">
-      {/* 头部区域：图标 + 标题 */}
-      <div className="flex items-center gap-2 mb-6 text-slate-700">
+    <div className="glass-panel group relative overflow-hidden rounded-3xl border border-white/10 bg-black/40 backdrop-blur-xl p-6 shadow-2xl shadow-black/80 hover:shadow-cyan-500/10 transition-all duration-300 hover:-translate-y-0.5">
+      
+      {/* 卡片頭部 */}
+      <div className="flex items-center gap-3 mb-6">
         {Icon && (
-          <Icon className="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform" />
+          <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-sky-500/20 flex items-center justify-center border border-cyan-400/30 group-hover:border-cyan-400/50 transition-colors">
+            <Icon className="w-5 h-5 text-cyan-400 group-hover:scale-110 transition-transform" />
+          </div>
         )}
-        <h3 className="font-bold text-lg tracking-tight text-slate-800">
+        
+        <h3 className="font-semibold text-xl text-white tracking-tight">
           {title}
         </h3>
       </div>
 
-      {/* 图表渲染区域 */}
-      {/* ResponsiveContainer 是关键，它让图表能够响应式缩放 */}
-      <div className="h-72 w-full min-h-[300px]">
+      {/* 圖表區域 */}
+      <div className="h-80 w-full min-h-[320px] relative">
         <ResponsiveContainer width="100%" height="100%">
           {children}
         </ResponsiveContainer>
       </div>
+
+      {/* 底部科技感裝飾線 */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400/30 to-transparent" />
     </div>
   );
 };

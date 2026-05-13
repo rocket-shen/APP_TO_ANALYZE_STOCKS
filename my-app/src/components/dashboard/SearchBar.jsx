@@ -20,7 +20,7 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol }) => {
 
   return (
     <div className="max-w-4xl mx-auto mb-10 text-center">
-    <h1 className="text-3xl font-extrabold mb-6 text-slate-800">股票财务透视</h1>
+    <h1 className="text-3xl font-extrabold mb-6 text-slate-300">A股上市公司財務數據儀表板</h1>
     <div className="flex gap-2 max-w-md mx-auto">
       <input
         type="text"
@@ -48,7 +48,7 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol }) => {
           className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md"
         >
           <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-          <span className="hidden sm:inline">同步</span>
+          <span className="hidden sm:inline">更新</span>
         </button>
       )}
     </div>

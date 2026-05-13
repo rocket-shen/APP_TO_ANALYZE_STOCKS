@@ -69,7 +69,7 @@ const DashboardHeader = ({ quote }) => {
             股票报告
           </div>
 
-          <h2 className="text-2xl font-bold text-slate-800">
+          <h2 className="text-2xl font-bold text-slate-300">
             {quote?.name || '未知股票'}
           </h2>
         </div>
@@ -91,7 +91,7 @@ const DashboardHeader = ({ quote }) => {
               </span>
               
               {/* 数值 */}
-              <span className={`font-semibold ${getColorClass(field, value) || 'text-slate-800'}`}>
+              <span className={`font-semibold ${getColorClass(field, value) || 'text-slate-300'}`}>
                 {formatValue(value, field)}
               </span>
             </div>

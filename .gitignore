@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# venv
+venv/
+.env/
+
+# VSCode
+.vscode/
+
+# Node
+node_modules/
+
+# Build
+dist/
+build/
+
+# Logs
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# Cache
+.cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large data
+data/
+temp/
+
+# Hexo
+.deploy_git/
+public/
+
+# Environment
+.env

@@ -27,6 +27,12 @@ const CashFlowChart = ({ data }) => {
         <Tooltip 
           formatter={(val, name) => [`${toBillion(val)} 亿元`, name]}
           cursor={{ fill: '#f8fafc' }}
+          contentStyle={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                borderRadius: '8px', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)' 
+              }}
         />
         <Legend verticalAlign="bottom" height={36} />
         <Bar 

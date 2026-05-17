@@ -43,7 +43,7 @@ const CashPaidReceivedChart = ({ data }) => {
             // 格式化 Tooltip 显示百分比或保留两位小数
             formatter={(val, name) => [val.toFixed(2), name]}
             />
-        <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ paddingBottom: 20 }} />
+        <Legend verticalAlign="top" align="right" iconType="circle" wrapperStyle={{ fontSize: 14, paddingTop: 3 }} />
         <Bar 
             dataKey="cash_received_ratio" 
             fill="#818cf8" 

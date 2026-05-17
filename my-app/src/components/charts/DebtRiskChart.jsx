@@ -17,8 +17,13 @@ const DebtRiskChart = ({ data }) => (
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
       <XAxis dataKey="report_date" tick={{fontSize: 12}} tickFormatter={formatXAxis} />
       <YAxis yAxisId="left" tick={{fontSize: 12}}/>
-      <Tooltip />
-      <Legend />
+      <Tooltip contentStyle={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                borderRadius: '8px', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)' 
+              }}/>
+      <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 14, paddingTop: 10 }}/>
       <Bar yAxisId="left" dataKey="current_ratio" fill="#94a3b8" name="流动比率" />
       <Line type="monotone" dataKey="asset_liab_ratio" stroke="#ef4444" name="负债率 %" />
     </ComposedChart>

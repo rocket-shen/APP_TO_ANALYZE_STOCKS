@@ -66,49 +66,73 @@ const EfficiencyChart = ({ data }) => {
     <ChartCard title="资产周转效率 (双轴)" Icon={Activity}>
       <div style={{ width: '100%', height: 300 }}>
         <ResponsiveContainer>
-          <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+          <LineChart 
+            data={data} 
+            /* 1. 这里的 left 改为负值（例如 -20），可以抵消 YAxis 占据的空白 */
+            margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
             
             <XAxis 
               dataKey="report_date" 
-              tick={{ fontSize: 12 }} 
+              tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.5)' }} 
               tickFormatter={formatXAxis} 
               axisLine={false}
               tickLine={false}
+              /* 2. 这里的 padding 让折线图的首尾点更靠近边缘 */
+              padding={{ left: 10, right: 10 }}
             />
 
-            {/* 左侧 Y 轴：对应应收账款周转率 */}
+            {/* 左侧 Y 轴 */}
             <YAxis 
               yAxisId="left"
               orientation="left"
               stroke="#f59e0b"
-              tick={{ fontSize: 12, fill: '#f59e0b' }} 
+              tick={{ fontSize: 10, fill: '#f59e0b' }} 
               tickLine={false}
+              axisLine={false}
+              /* 3. 强制限制宽度，避免它撑开容器 */
+              width={45} 
             />
 
-            {/* 右侧 Y 轴：对应存货周转率 */}
+            {/* 右侧 Y 轴 */}
             <YAxis 
               yAxisId="right"
               orientation="right"
               stroke="#ec4899"
-              tick={{ fontSize: 12, fill: '#ec4899' }} 
+              tick={{ fontSize: 10, fill: '#ec4899' }} 
               tickLine={false}
+              axisLine={false}
+              /* 3. 同样限制宽度 */
+              width={45} 
             />
 
             <Tooltip 
-              contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+              contentStyle={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                borderRadius: '8px', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)' 
+              }}
             />
-            <Legend verticalAlign="top" align="right" height={36}/>
+            
+            {/* 4. Legend 增加 negative margin 稍微上移，节省空间 */}
+            <Legend 
+              verticalAlign="top" 
+              align="right" 
+              iconType="circle"
+              wrapperStyle={{ fontSize: 12, paddingBottom: 20, right: 0 }}
+            />
 
             <Line 
               yAxisId="left"
-              type="monotone" // 建议改用平滑曲线，看起来更直观
+              type="monotone"
               dataKey="ar_turnover" 
               stroke="#f59e0b" 
               name="应收账款周转率" 
               strokeWidth={2} 
-              dot={{ r: 3 }}
-              activeDot={{ r: 5 }}
+              dot={{ r: 2, fill: '#f59e0b' }}
+              activeDot={{ r: 4 }}
             />
             
             <Line 
@@ -118,8 +142,8 @@ const EfficiencyChart = ({ data }) => {
               stroke="#ec4899" 
               name="存货周转率" 
               strokeWidth={2} 
-              dot={{ r: 3 }}
-              activeDot={{ r: 5 }}
+              dot={{ r: 2, fill: '#ec4899' }}
+              activeDot={{ r: 4 }}
             />
           </LineChart>
         </ResponsiveContainer>

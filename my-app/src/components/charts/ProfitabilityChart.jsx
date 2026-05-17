@@ -13,12 +13,17 @@ const formatXAxis = (tickItem) => {
 
 const ProfitabilityChart = ({ data }) => (
   <ChartCard title="盈利能力趋势" Icon={TrendingUp}>
-    <LineChart data={data}>
+    <LineChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
-      <XAxis dataKey="report_date" tick={{fontSize: 12}} tickFormatter={formatXAxis} />
+      <XAxis dataKey="report_date" tick={{fontSize: 12}} tickFormatter={formatXAxis} padding={{ left: 10, right: 10 }} />
       <YAxis tick={{fontSize: 12}} />
-      <Tooltip />
-      <Legend />
+      <Tooltip contentStyle={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                borderRadius: '8px', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)' 
+              }}/>
+      <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 14, paddingTop: 10 }}/>
       <Line type="monotone" dataKey="roe" stroke="#6366f1" name="ROE %" strokeWidth={2} />
       <Line type="monotone" dataKey="gross_margin" stroke="#10b981" name="毛利率 %" strokeWidth={2} />
       <Line type="monotone" dataKey="net_profit_margin" stroke="#f59e0b" name="净利率 %" strokeWidth={2} />

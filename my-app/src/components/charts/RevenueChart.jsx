@@ -27,26 +27,26 @@ const RevenueChart = ({ data }) => {
     <ChartCard title="营业收入趋势" Icon={TrendingUp}>
       <ComposedChart
         data={data}
-        margin={{ top: 10, right: 0, left: 0, bottom: 10 }}
+        margin={{ top: 10, right: -20, left: -20, bottom: 0 }}
       >
         <CartesianGrid 
           strokeDasharray="3 3" 
           vertical={false} 
-          stroke="#eee" 
+          stroke="rgba(255,255,255,0.1)"
         />
 
         <XAxis
           dataKey="report_date"
-          tick={{ fontSize: 12 }}
+          tick={{ fontSize: 10, fill: 'rgba(255,255,255,0.5)' }} 
           tickFormatter={formatXAxis}
-          axisLine={{ stroke: '#ddd' }}
+          axisLine={{ stroke: 'rgba(255,255,255,0.5)' }}
           tickLine={false}
         />
 
         {/* 左轴：营业收入（亿） */}
         <YAxis
             yAxisId="left"
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 10, fill: '#60a5fa' }}
             tickFormatter={(val) => `${Number((val / 1e8).toFixed(0))}亿`}
             axisLine={{ stroke: '#60a5fa' }}  // 👈 左轴颜色呼应柱状图
             tickLine={{ stroke: '#60a5fa' }}
@@ -56,7 +56,7 @@ const RevenueChart = ({ data }) => {
         <YAxis
             yAxisId="right"
             orientation="right"
-            tick={{ fontSize: 12 }}
+            tick={{ fontSize: 10, fill: '#9b6603' }}
             tickFormatter={(val) => `${Number((val * 100).toFixed(0))}%`}
             axisLine={{ stroke: '#9b6603' }}  // 👈 右轴颜色呼应折线图
             tickLine={{ stroke: '#9b6603' }}
@@ -69,6 +69,12 @@ const RevenueChart = ({ data }) => {
             }
             return [`${toPercent(value)}%`, name];
             }}
+            contentStyle={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                borderRadius: '8px', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)' 
+              }}
         />
 
         <Legend 
@@ -94,8 +100,8 @@ const RevenueChart = ({ data }) => {
           dataKey="revenue_yoy"
           stroke="#9b6603ff"
           strokeWidth={2}
-          dot={{ r: 3, fill: "#fff", strokeWidth: 2 }}
-          activeDot={{ r: 5 }}
+          dot={{ r: 2, fill: "#fff", strokeWidth: 2 }}
+          activeDot={{ r: 4 }}
           name="收入同比"
         />
       </ComposedChart>

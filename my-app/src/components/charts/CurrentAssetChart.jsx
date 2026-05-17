@@ -28,7 +28,7 @@ const CurrentAssetChart = ({ data }) => {
           formatter={(val, name) => [`${toBillion(val)} 亿元`, name]}
           cursor={{ fill: '#f8fafc' }}
         />
-        <Legend verticalAlign="bottom" height={36} />
+        <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: 14, paddingTop: 10 }}/>
         <Bar dataKey="currency_funds" stackId="a" fill="#aed6f1" name="货币资金" />
         <Bar dataKey="ar_and_br" stackId="a" fill="#5dade2" name="应收账款" />
         <Bar dataKey="inventory" stackId="a" fill="#85c1e9" name="存货" />

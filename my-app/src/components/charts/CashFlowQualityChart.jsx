@@ -58,10 +58,14 @@ const CashFlowQualityChart = ({ data }) => {
             
             <Tooltip 
               formatter={(val, name) => [`${toBillion(val)} 亿元`, name]}
-              contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+              contentStyle={{ 
+                backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                borderRadius: '8px', 
+                border: '1px solid rgba(255,255,255,0.1)',
+                backdropFilter: 'blur(10px)' 
+              }}
             />
-            
-            <Legend verticalAlign="top" align="right" iconType="circle" />
+            <Legend verticalAlign="top" align="right" wrapperStyle={{ fontSize: 14, paddingTop: 3 }}/>
 
             {/* 1. 先画“面”：经营现金流 (作为底色) */}
             <Area

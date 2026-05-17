@@ -81,7 +81,7 @@ const FinancialDashboard = () => {
   return (
   <div className="min-h-screen bg-[#0a0f1c] text-slate-200 font-sans">
     {/* 全局背景網格（可選，更有終端感） */}
-    <div className="fixed inset-0 bg-[linear-gradient(to_right,#1a2333_1px,transparent_1px),linear-gradient(to_bottom,#1a2333_1px,transparent_1px)] bg-[size:40px_40px] opacity-40 pointer-events-none" />
+    <div className="fixed inset-0 bg-[linear-gradient(to_right,#1a2333_1px,transparent_1px),linear-gradient(to_bottom,#1a2333_1px,transparent_1px)] bg-size-[40px_40px] opacity-40 pointer-events-none" />
 
     <div className="relative p-6 max-w-7xl mx-auto">
       {/* 搜索欄區域 */}
@@ -140,7 +140,7 @@ const FinancialDashboard = () => {
       {/* 同步提示卡片 */}
       {showSync && data.length === 0 && (
         <div className="glass-panel max-w-md mx-auto mt-12 p-8 text-center border border-white/10 backdrop-blur-2xl bg-black/60 shadow-xl shadow-cyan-900/30 rounded-3xl">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-orange-500/20 flex items-center justify-center border border-cyan-400/30">
+          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-linear-to-br from-cyan-500/20 to-orange-500/20 flex items-center justify-center border border-cyan-400/30">
             <Download className="w-8 h-8 text-cyan-400" />
           </div>
           <h3 className="text-2xl font-semibold mb-3 text-white">未發現本地數據</h3>
@@ -150,7 +150,7 @@ const FinancialDashboard = () => {
           <button
             onClick={handleSync}
             disabled={loading}
-            className="w-full py-4 bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-medium rounded-2xl shadow-lg shadow-cyan-500/50 transition-all active:scale-[0.985]"
+            className="w-full py-4 bg-linear-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-medium rounded-2xl shadow-lg shadow-cyan-500/50 transition-all active:scale-[0.985]"
           >
             {loading ? "正在從雲端同步..." : "立即同步抓取數據"}
           </button>

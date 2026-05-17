@@ -27,12 +27,12 @@ const NetProfitChart = ({ data }) => {
     <ChartCard title="净利润趋势" Icon={TrendingUp}>
       <ComposedChart
         data={data}
-        margin={{ top: 10, right: 0, left: 0, bottom: 10 }}
+        margin={{ top: 10, right: -20, left: -20, bottom: 0 }}
       >
         <CartesianGrid 
           strokeDasharray="3 3" 
           vertical={false} 
-          stroke="#eee" 
+          stroke="rgba(255,255,255,0.1)" 
         />
 
         <XAxis

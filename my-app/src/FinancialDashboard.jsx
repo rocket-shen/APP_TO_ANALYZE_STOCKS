@@ -8,7 +8,6 @@ import ProfitabilityChart from './components/charts/ProfitabilityChart';
 import DebtRiskChart from './components/charts/DebtRiskChart';
 import EfficiencyChart from './components/charts/EfficiencyChart';
 import CashFlowQualityChart from './components/charts/CashFlowQualityChart';
-import CashFlowChart from './components/charts/CashFlowChart';
 import AssetTrendChart from './components/charts/AssetTrendChart';
 import CurrentAssetChart from './components/charts/CurrentAssetChart';
 import CashFlowFreeChart from './components/charts/CashFlowFree';
@@ -33,6 +32,7 @@ const FinancialDashboard = () => {
     } else {
       setData([...financialResult].reverse());
       setShowSync(false);
+      setError(null);
     }
   };
 

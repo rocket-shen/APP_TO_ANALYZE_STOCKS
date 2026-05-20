@@ -48,6 +48,9 @@ WITH base_data AS (
         -- 新增：购建固定资产等支付的现金 (Capital Expenditure)
         CAST(json_extract(c.raw_json, '$.cash_paid_for_assets[0]') AS REAL)          AS cash_paid_for_assets
 
+        -- 新增：处置固定资产、无形资产和其他长期资产收回的现金净额 (Capital Expenditure)
+        CAST(json_extract(c.raw_json, '$.net_cash_of_disposal_assets[0]') AS REAL) AS net_cash_of_disposal_assets
+
     FROM income_sheet i
     JOIN balance_sheet b
         ON i.symbol = b.symbol AND i.report_date = b.report_date
@@ -86,7 +89,7 @@ financial_ratios AS (
         END AS net_profit_margin,
 
         --  自由现金流 (经营现金流 - 资本支出)
-        ROUND(net_cash_flow_operating - COALESCE(cash_paid_for_assets, 0), 2) AS free_cash_flow,
+        ROUND(net_cash_flow_operating - COALESCE(cash_paid_for_assets, 0) + COALESCE(net_cash_of_disposal_assets, 0), 2) AS free_cash_flow,
 
         --  收现比 (销售商品收到的现金 / 营业收入)
         CASE WHEN revenue > 0 THEN ROUND(cash_from_sales / revenue, 4) END AS cash_received_ratio,

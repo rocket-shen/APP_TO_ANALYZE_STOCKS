@@ -69,7 +69,7 @@ const EfficiencyChart = ({ data }) => {
           <LineChart 
             data={data} 
             /* 1. 这里的 left 改为负值（例如 -20），可以抵消 YAxis 占据的空白 */
-            margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
+            margin={{ top: 10, right: -15, left: -20, bottom: 0 }}
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
             
@@ -89,8 +89,6 @@ const EfficiencyChart = ({ data }) => {
               orientation="left"
               stroke="#f59e0b"
               tick={{ fontSize: 10, fill: '#f59e0b' }} 
-              tickLine={false}
-              axisLine={false}
               /* 3. 强制限制宽度，避免它撑开容器 */
               width={45} 
             />
@@ -101,8 +99,6 @@ const EfficiencyChart = ({ data }) => {
               orientation="right"
               stroke="#ec4899"
               tick={{ fontSize: 10, fill: '#ec4899' }} 
-              tickLine={false}
-              axisLine={false}
               /* 3. 同样限制宽度 */
               width={45} 
             />

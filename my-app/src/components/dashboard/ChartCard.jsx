@@ -21,7 +21,7 @@ const ChartCard = ({ title, children, Icon }) => {
     ">
 
       {/* 頂部橙色標識線 */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-orange-500" />
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-orange-500" />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-4">

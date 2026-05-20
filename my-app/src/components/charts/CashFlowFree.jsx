@@ -30,7 +30,7 @@ const CashFlowFreeChart = ({ data }) => {
     <ChartCard title="自由现金流趋势" Icon={TrendingUp}>
       <ComposedChart
         data={data}
-        margin={{ top: 10, right: 0, left: 0, bottom: 10 }}
+        margin={{ top: 10, right: 0, left: -15, bottom: 0 }}
       >
         <CartesianGrid 
           strokeDasharray="3 3" 

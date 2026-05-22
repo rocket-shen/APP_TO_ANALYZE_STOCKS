@@ -83,8 +83,10 @@ financial_ratios AS (
         revenue_yoy,
         net_profit,
         net_profit_yoy,
+        net_profit_atsopc,  
         total_assets,
         total_liab,
+        net_cash_flow_operating,
 
         -- 🌟 [资产重轻结构透视明细]
         COALESCE(fixed_asset_sum, 0)       AS fixed_asset_sum,       -- 固定资产
@@ -122,7 +124,7 @@ financial_ratios AS (
         END AS net_profit_margin,
 
         -- 核心利润
-        ROUND(revenue - operating_cost - operating_taxes_and_surcharge - sales_fee - manage_fee - rad_cost - financial_expense, 2) AS core_profit,
+        ROUND(revenue - operating_cost - operating_taxes_and_surcharge - sales_fee - manage_fee - rad_cost - COALESCE(financing_expenses, 0), 2) AS core_profit,
 
         -- [精确修正：完善版自由现金流（经营现金流 - 资本支出 + 资产处置回收金额）]
         ROUND(net_cash_flow_operating - COALESCE(cash_paid_for_assets, 0) + COALESCE(net_cash_of_disposal_assets, 0), 2) AS free_cash_flow,

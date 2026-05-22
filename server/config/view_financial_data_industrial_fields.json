@@ -14,7 +14,7 @@
     "financing_expenses": "财务费用 (Financing / Interest Expenses)",
     "net_profit": "净利润 (Net Profit)",
     "net_profit_yoy": "净利润同比变动率 (Net Profit Year-on-Year Growth Rate)",
-    "net_profit_atsopc": "归属于母公司所有者的净利润 (Net Profit Attributable to Shareholders of Parent Company)",
+    "net_profit_atsopc": "归母净利润 (Net Profit Attributable to Shareholders of Parent Company)",
     "asset_impairment_loss": "资产减值损失 (Asset Impairment Loss)",
     "credit_impairment_loss": "信用减值损失 (Credit Impairment Loss)",
     "total_assets": "资产总额 / 总资产 (Total Assets)",

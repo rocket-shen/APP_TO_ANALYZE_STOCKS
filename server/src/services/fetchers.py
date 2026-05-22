@@ -37,16 +37,16 @@ async def fetch_xq_data(symbol: str, report_type: str) -> list[dict]:
 
     async with httpx.AsyncClient(timeout=15.0) as client:
         try:
-            # 3. 获取并注入 Cookie
-            cookie_str = await XueqiuCookieManager.get_cookie(client)
-            headers = {
-                **XueqiuCookieManager.HEADERS,
-                "Cookie": cookie_str,
-                "Referer": "https://xueqiu.com/"
-            }
+            # ==================== 关键修改部分 ====================
+            # 获取 cookies（现在返回的是 httpx.Cookies 对象）
+            cookies: httpx.Cookies = await XueqiuCookieManager.get_cookies()
 
-            # 4. 发起请求
-            resp = await client.get(url, headers=headers, params=params)
+            resp = await client.get(
+                url, 
+                headers=XueqiuCookieManager.HEADERS,
+                cookies=cookies,      # ← 直接传 cookies 对象
+                params=params
+            )
             resp.raise_for_status()
             
             payload = resp.json().get("data", {})
@@ -84,28 +84,29 @@ async def fetch_xq_quote(symbol: str) -> dict:
     """
     获取雪球的股票报价数据
     """
-    logger.info(f"开始抓取雪球的股票报价数据: {symbol}")
-    
-    url = "https://stock.xueqiu.com/v5/stock/quote.json"
-    params = {
-        "symbol": symbol.upper(),
-        "extend": "detail"
+    cookies = await XueqiuCookieManager.get_cookies()
+
+    headers = {
+        "Referer": f"https://xueqiu.com/S/{symbol}",
+        "User-Agent": (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/124.0.0.0 Safari/537.36"
+        )
     }
 
-    async with httpx.AsyncClient(timeout=10.0) as client:
-        try:
-            cookie_str = await XueqiuCookieManager.get_cookie(client)
-            headers = {
-                **XueqiuCookieManager.HEADERS,
-                "Cookie": cookie_str,
-                "Referer": "https://xueqiu.com/"
-            }
+    url = (
+        "https://stock.xueqiu.com/v5/stock/quote.json"
+        f"?symbol={symbol}&extend=detail"
+    )
 
-            resp = await client.get(url, headers=headers, params=params)
-            resp.raise_for_status()
-            data = resp.json().get("data", {}).get("quote", {})
-            return data
+    async with httpx.AsyncClient(
+        headers=XueqiuCookieManager.HEADERS,
+        cookies=cookies,
+        timeout=15.0,
+    ) as client:
 
-        except Exception as e:
-            logger.error(f"测试抓取股票 {symbol} 报价数据失败: {str(e)}")
-            raise e
+        resp = await client.get(url)
+        resp.raise_for_status()
+        data = resp.json().get("data", {}).get("quote", {})
+        return data

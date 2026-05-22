@@ -14,3 +14,12 @@ export const fetchQuoteData = async (symbol) => {
   }
   return await response.json();
 };
+
+export const fetchFinancialPerformance = async (code) => {
+  const response = await fetch(`/api/financial_performance/${code}`);
+  if (!response.ok) {
+    throw new Error('Network response was not ok');
+  }
+  const data = await response.json();
+  return data;
+};

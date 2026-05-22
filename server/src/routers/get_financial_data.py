@@ -32,6 +32,34 @@ async def get_financial_data(symbol: str, request: Request):
         # 错误处理可以保持异常抛出，FastAPI 会自动处理为 500
         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
     
+@router.get("/financial_performance/{code}")
+async def get_financial_performance(code: str, request: Request):
+
+    sql = request.app.state.queries.get("get_financial_performance")
+    db_path = request.app.state.db_path
+
+    if not sql:
+        raise HTTPException(
+            status_code=500,
+            detail="SQL template 'get_financial_performance' not found"
+        )
+
+    try:
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+
+            cursor = conn.execute(sql, {"code": code})
+
+            rows = cursor.fetchall()
+
+            return [dict(row) for row in rows]
+
+    except sqlite3.Error as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Database error: {str(e)}"
+        )
+    
 @router.post("/sync_financial_data/{symbol}")
 async def sync_data(symbol: str, request: Request):
     """

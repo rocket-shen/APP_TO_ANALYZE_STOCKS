@@ -1,6 +1,8 @@
 import { quoteFields } from "../../config/quoteFields"
 
 const DashboardHeader = ({ quote }) => {
+
+  const now = new Date();
   
   // 1. 格式化函数：处理数字、单位、百分比、正负号
   const formatValue = (value, fieldKey) => {
@@ -66,7 +68,7 @@ const DashboardHeader = ({ quote }) => {
 
         <div className="flex items-center gap-3">
           <div className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold">
-            股票报告
+            股票报价
           </div>
 
           <h2 className="text-2xl font-bold text-slate-300">
@@ -75,11 +77,19 @@ const DashboardHeader = ({ quote }) => {
         </div>
 
         <div className="text-sm text-slate-500">
-          更新时间：{new Date().toLocaleDateString()}
+          更新时间：
+          {now.toLocaleTimeString('zh-CN', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          })}
+          {' '}
+          {now.toLocaleDateString('zh-CN', {
+            weekday: 'long'
+          })}
         </div>
 
       </div>
-
       {/* 数据网格区域 */}
       <div className="exchange-data-container mt-6">
         <div className="exchange-data-grid grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 text-sm">
@@ -98,7 +108,6 @@ const DashboardHeader = ({ quote }) => {
           ))}
         </div>
       </div>
-
     </div>
   );
 };

@@ -1,3 +1,4 @@
+# -- filepath: server/app/parsers/quote_parser.py
 def normalize_quote(q: dict):
 
     return {

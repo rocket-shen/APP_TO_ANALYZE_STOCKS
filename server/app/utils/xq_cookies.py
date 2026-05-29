@@ -1,3 +1,4 @@
+#  -- filepath: server/app/utils/xq_cookies.py
 import time
 import asyncio
 import logging
@@ -82,6 +83,7 @@ class XueqiuCookieManager:
             logger.warning("[XueqiuAuth] Refresh timeout")
         except Exception as e:
             logger.error(f"[XueqiuAuth] Refresh error: {repr(e)}")
+            logger.error(traceback.format_exc())
         
         return False
 

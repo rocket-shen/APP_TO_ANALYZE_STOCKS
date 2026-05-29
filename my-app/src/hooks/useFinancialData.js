@@ -9,6 +9,7 @@ export const useFinancialData = () => {
 
   const loadFinancial = async (targetSymbol) => {
     setError(null);
+    setShowSync(false);
     try {
       const financialResult = await fetchFinancialData(targetSymbol);
       if (!financialResult || financialResult.length === 0) {
@@ -22,11 +23,12 @@ export const useFinancialData = () => {
     } catch (err) {
       setError("获取财务数据失败");
       setData([]);
+      setShowSync(true);
     }
   };
 
   const syncFinancial = async (symbol) => {
-    const response = await fetch(`/api/sync_financial_data/${symbol}`, { method: 'POST' });
+    const response = await fetch(`/api/v1/sync_financial_data/${symbol}`, { method: 'POST' });
     const result = await response.json();
     
     if (response.ok) {

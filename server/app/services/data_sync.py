@@ -1,11 +1,13 @@
+# -- filepath: server/app/services/data_sync.py
 import asyncio
 import logging
-from src.services.fetchers import fetch_xq_data # 假设你的抓取函数在此
-from src.services.db_crud import upsert_balance_records, upsert_cash_records, upsert_income_records
+from app.services.fetchers import fetch_xq_data # 假设你的抓取函数在此
+from app.crud.stock_crud import upsert_balance_records, upsert_cash_records, upsert_income_records
+from app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
-async def sync_stock_data(symbol: str, db_path: str):
+async def sync_stock_data(symbol: str):
     """
     协调者：并发抓取三张财报表并入库
     """
@@ -29,13 +31,13 @@ async def sync_stock_data(symbol: str, db_path: str):
         balance_data, cash_data, income_data = await asyncio.gather(*tasks)
 
         # 2. 顺序入库 (避免 SQLite 锁竞争)
-        await upsert_balance_records(balance_data, db_path)
-        await upsert_cash_records(cash_data, db_path)
-        await upsert_income_records(income_data, db_path)
+        await upsert_balance_records(balance_data)
+        await upsert_cash_records(cash_data)
+        await upsert_income_records(income_data)
 
         logger.info(f"股票 {symbol} 同步成功：入库 {len(balance_data)} 条报表记录")
         return True
 
     except Exception as e:
         logger.error(f"同步股票 {symbol} 失败: {str(e)}")
-        raise e
+        raise

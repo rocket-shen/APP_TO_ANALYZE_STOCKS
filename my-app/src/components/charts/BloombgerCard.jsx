@@ -1,3 +1,4 @@
+// --filepath my-app/src/components/charts/BloombgerCard.jsx
 import React, { useState } from 'react';
 import {
   ResponsiveContainer,
@@ -188,16 +189,33 @@ export default function BloombergChart({data}) {
                   dataKey="free_cash_flow" 
                   name="自由现金流" 
                   maxBarSize={45}
-                  // 经典彭博染色：正数显暗绿充当背景，负数（失血）显暗红
-                    shape={(props) => {
-                      const { x, y, width, height, value } = props;
-                      const isPositive = value >= 0;
-                      const fill = isPositive ? BB_COLORS.green : BB_COLORS.red;
-                      // 修复负值渲染
-                      const rectY = isPositive ? y : y + height;
-                      const rectHeight = Math.abs(height);
-                      return <rect x={x} y={rectY} width={width} height={rectHeight} fill={fill} opacity={0.8} />;
-                    }}
+                  shape={(props) => {
+                    const { x, y, width, height, value, payload } = props;
+                    
+                    const isPositive = value >= 0;
+                    let fill = isPositive ? BB_COLORS.green : BB_COLORS.red;
+                    const dateStr = payload?.report_date?.toString() || '';
+                    const isYearEnd = dateStr.includes('-12-31') || 
+                                      dateStr.endsWith('/12') || 
+                                      dateStr.includes('/12/');
+                    if (isYearEnd) {
+                      fill = '#d4e7f0';     // ← 这里改成你想要的特定颜色（目前是亮橙色）
+                    }
+                    const rectY = isPositive ? y : y + height;
+                    const rectHeight = Math.abs(height);
+
+                    return (
+                      <rect 
+                        x={x} 
+                        y={rectY} 
+                        width={width} 
+                        height={rectHeight} 
+                        fill={fill} 
+                        opacity={0.85}
+                        rx={2} // 可选：加一点圆角更好看
+                      />
+                    );
+                  }}
                 />
                 {/* 3. 折线图A (左轴)：最终净利润，高亮穿梭看“剪刀差” */}
                 <Line 

@@ -1,5 +1,6 @@
+// filepath: my-app/src/services/api.js
 export const fetchFinancialData = async (symbol) => {
-  const response = await fetch(`/api/financial_data/${symbol}`);
+  const response = await fetch(`/api/v1/financial_data/${symbol}`);
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }
@@ -8,7 +9,7 @@ export const fetchFinancialData = async (symbol) => {
 };
 
 export const fetchQuoteData = async (symbol) => {
-  const response = await fetch(`/api/quote_data/${symbol}`);
+  const response = await fetch(`/api/v1/quote_data/${symbol}`);
   if (!response.ok) {
     throw new Error("获取quote_data行情失败");
   }
@@ -16,7 +17,7 @@ export const fetchQuoteData = async (symbol) => {
 };
 
 export const fetchFinancialPerformance = async (code) => {
-  const response = await fetch(`/api/financial_performance/${code}`);
+  const response = await fetch(`/api/v1/financial_performance/${code}`);
   if (!response.ok) {
     throw new Error('Network response was not ok');
   }

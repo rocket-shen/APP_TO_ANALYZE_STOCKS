@@ -5,4 +5,3 @@ WHERE code = :code
     AND report_date >= '2017-01-01'
     AND report_date LIKE '%-12-31'
 ORDER BY report_date DESC;
-

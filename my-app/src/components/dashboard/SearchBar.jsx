@@ -1,7 +1,8 @@
+// -- filepath: my-app/src/components/dashboard/SearchBar.jsx
 import React from 'react';
-import { Search, Loader2, RefreshCw } from 'lucide-react';
+import { Search, Loader2, RefreshCw, Download } from 'lucide-react';
 
-const SearchBar = ({onSearch, loading, error, onSync, symbol }) => {
+const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
   const [inputSymbol, setInputSymbol] = React.useState('');
 
   const handleSearch = () => {
@@ -15,6 +16,13 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol }) => {
     if (targetSymbol && onSync) {
       onSync(targetSymbol);
     }
+  };
+
+  const handleDownload = async () => {
+    const targetSymbol = symbol || inputSymbol;
+    if (!targetSymbol || !onDownload) return;
+    
+    await onDownload(targetSymbol);
   };
 
 
@@ -41,16 +49,30 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol }) => {
       </button>
 
       {symbol && (
-        <button
-          onClick={handleSyncClick}
-          disabled={loading}
-          title="同步最新财务数据"
-          className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md"
-        >
-          <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
-          <span className="hidden sm:inline">更新</span>
-        </button>
-      )}
+          <>
+            {/* 更新按鈕 */}
+            <button
+              onClick={handleSyncClick}
+              disabled={loading}
+              title="同步最新財務數據"
+              className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md"
+            >
+              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">更新</span>
+            </button>
+
+            {/* 新增：下載 Excel 按鈕 */}
+            <button
+              onClick={handleDownload}
+              disabled={loading || !symbol}
+              title="下載 Excel 財務報表"
+              className="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md"
+            >
+              <Download className="w-5 h-5" />
+              <span className="hidden sm:inline">下載</span>
+            </button>
+          </>
+        )}
     </div>
     {error && <p className="mt-3 text-red-500 text-sm">{error}</p>}
   </div>

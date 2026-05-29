@@ -1,10 +1,14 @@
+# -- filepath: server/app/services/fetchers.py
 import time
 import httpx
 import logging
 from datetime import datetime
-from utilis.xq_cookies import XueqiuCookieManager
+# === 新結構導入 ===
+from app.core.config import settings
+from app.utils.xq_cookies import XueqiuCookieManager   # 建議把 utils 移到 app/utils/
 
 logger = logging.getLogger(__name__)
+
 
 async def fetch_xq_data(symbol: str, report_type: str) -> list[dict]:
     """
@@ -26,7 +30,7 @@ async def fetch_xq_data(symbol: str, report_type: str) -> list[dict]:
     if not url:
         raise ValueError(f"不支持的报表类型: {report_type}")
 
-    # 2. 准备请求参数
+    # 2. 準備請求參數
     params = {
         "symbol": symbol.upper(),
         "type": "all",
@@ -35,16 +39,15 @@ async def fetch_xq_data(symbol: str, report_type: str) -> list[dict]:
         "timestamp": int(round(time.time() * 1000))
     }
 
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with httpx.AsyncClient(timeout=settings.TIMEOUT) as client:
         try:
-            # ==================== 关键修改部分 ====================
-            # 获取 cookies（现在返回的是 httpx.Cookies 对象）
+            # 獲取 cookies
             cookies: httpx.Cookies = await XueqiuCookieManager.get_cookies()
 
             resp = await client.get(
                 url, 
                 headers=XueqiuCookieManager.HEADERS,
-                cookies=cookies,      # ← 直接传 cookies 对象
+                cookies=cookies,
                 params=params
             )
             resp.raise_for_status()
@@ -53,59 +56,61 @@ async def fetch_xq_data(symbol: str, report_type: str) -> list[dict]:
             data_list = payload.get("list", [])
             stock_name = payload.get("quote_name", "未知")
 
-            # 5. 数据清洗与转换
+            # 5. 數據清洗與轉換
             results = []
             for item in data_list:
                 report_date_ts = item.get("report_date")
                 if not report_date_ts:
                     continue
 
-                # 注入额外字段供入库使用
                 item["symbol"] = symbol.upper()
                 item["stock_name"] = stock_name
-                # 将毫秒时间戳转换为 YYYY-MM-DD
                 item["report_date"] = datetime.fromtimestamp(
                     report_date_ts / 1000
                 ).strftime("%Y-%m-%d")
 
                 results.append(item)
 
-            logger.info(f"成功抓取 {symbol} - {report_type}: {len(results)} 条记录")
+            logger.info(f"成功抓取 {symbol} - {report_type}: {len(results)} 條記錄")
             return results
 
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP错误 {e.response.status_code}: {symbol} - {report_type}")
+            logger.error(f"HTTP錯誤 {e.response.status_code}: {symbol} - {report_type}")
             raise
         except Exception as e:
-            logger.error(f"解析错误 {symbol} - {report_type}: {str(e)}")
+            logger.error(f"解析錯誤 {symbol} - {report_type}: {str(e)}")
             raise
+
 
 async def fetch_xq_quote(symbol: str) -> dict:
     """
-    获取雪球的股票报价数据
+    獲取雪球的股票報價數據
     """
     cookies = await XueqiuCookieManager.get_cookies()
 
     headers = {
-        "Referer": f"https://xueqiu.com/S/{symbol}",
         "User-Agent": (
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
             "AppleWebKit/537.36 (KHTML, like Gecko) "
             "Chrome/124.0.0.0 Safari/537.36"
-        )
+        ),
+        "Referer": f"https://xueqiu.com/S/{symbol}",
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;q=0.9,"
+            "image/avif,image/webp,*/*;q=0.8"
+        ),
+        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
+        "Connection": "keep-alive",
+        "DNT": "1",
     }
 
-    url = (
-        "https://stock.xueqiu.com/v5/stock/quote.json"
-        f"?symbol={symbol}&extend=detail"
-    )
+    url = f"https://stock.xueqiu.com/v5/stock/quote.json?symbol={symbol}&extend=detail"
 
     async with httpx.AsyncClient(
         headers=XueqiuCookieManager.HEADERS,
         cookies=cookies,
-        timeout=15.0,
+        timeout=settings.TIMEOUT,
     ) as client:
-
         resp = await client.get(url)
         resp.raise_for_status()
         data = resp.json().get("data", {}).get("quote", {})

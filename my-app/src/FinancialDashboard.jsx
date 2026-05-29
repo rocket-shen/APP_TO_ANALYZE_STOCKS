@@ -13,6 +13,7 @@ import { useFinancialData } from './hooks/useFinancialData';
 import { useQuoteData } from './hooks/useQuoteData';
 import { usePerformance } from './hooks/usePerformance';
 import { useDashboardSearch } from './hooks/useDashboardSearch';
+import { useDownloadExcel } from './hooks/useDownloadExcel';
 
 const FinancialDashboard = () => {
   // 1. 各司其职的业务数据 Hooks
@@ -28,6 +29,8 @@ const FinancialDashboard = () => {
     syncFinancial,
   );
 
+  const { handleDownload, downloading } = useDownloadExcel();
+
   // 汇聚底层 Hook 的错误提示（如果有的话优先展示顶层错误）
   const displayError = error || financialError || quoteError || performanceError;
 
@@ -42,6 +45,7 @@ const FinancialDashboard = () => {
         <SearchBar
           onSearch={handleSearch}
           onSync={handleSync}
+          onDownload={handleDownload}
           symbol={symbol}
           loading={loading}
           error={displayError}

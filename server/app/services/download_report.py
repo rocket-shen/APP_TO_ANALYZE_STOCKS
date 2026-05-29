@@ -1,13 +1,17 @@
+# --filepath: server/app/services/download_report.py
 import time
+from fastapi import Path
 import httpx
 import logging
 import json
 from datetime import datetime
-from utilis.xq_cookies import XueqiuCookieManager
+from app.utils.xq_cookies import XueqiuCookieManager
 import pandas as pd
-from utilis.tools import load_financial_config
-from config.config import settings
+from pandas import DataFrame
+from app.utils.tools import load_financial_config
+from app.core.config import settings
 import aiosqlite
+from typing import Union
 
 FIELD_MAP = json.loads(settings.FINANCIAL_FIELDS_JSON.read_text(encoding="utf-8"))
 
@@ -56,7 +60,7 @@ def get_field_mapping(org_type: int, report_type: str) -> dict:
     return {}
 
 
-async def download_report(symbol: str, report_type: str) -> pd.DataFrame:
+async def download_report(symbol: str, report_type: str) -> dict:
     """
     通用雪球财报抓取器
     
@@ -85,18 +89,17 @@ async def download_report(symbol: str, report_type: str) -> pd.DataFrame:
         "timestamp": int(round(time.time() * 1000))
     }
 
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with httpx.AsyncClient(timeout=settings.TIMEOUT) as client:
         try:
-            # 3. 获取并注入 Cookie
-            cookie_str = await XueqiuCookieManager.get_cookie(client)
-            headers = {
-                **XueqiuCookieManager.HEADERS,
-                "Cookie": cookie_str,
-                "Referer": "https://xueqiu.com/"
-            }
+            # 獲取 cookies
+            cookies: httpx.Cookies = await XueqiuCookieManager.get_cookies()
 
-            # 4. 发起请求
-            resp = await client.get(url, headers=headers, params=params)
+            resp = await client.get(
+                url, 
+                headers=XueqiuCookieManager.HEADERS,
+                cookies=cookies,
+                params=params
+            )
             resp.raise_for_status()
             
             payload = resp.json().get("data", {})
@@ -128,7 +131,7 @@ async def download_report(symbol: str, report_type: str) -> pd.DataFrame:
                 'org_type': org_type,
                 'quote_name': quote_name,
                 'report_type': report_type
-            }
+                }
         
 
         except httpx.HTTPStatusError as e:
@@ -241,9 +244,9 @@ async def get_financial_reports_from_db(symbol: str, db_path: str) -> dict:
 
 
 async def save_financial_reports_to_excel(
-    symbol: str, 
+    symbol: str,
     db_path: str,
-    folder_path: str = 'D:/雪球数据/个股财务报表',
+    folder_path: str,
     use_db: bool = True
 ):
     """
@@ -311,14 +314,14 @@ async def save_financial_reports_to_excel(
                     "income": "利润表",
                     "cash_flow": "现金流量表"
                 }
-                sheet_name = sheet_name_map.get(report_type, report_type)
+                sheet_name: str = sheet_name_map.get(report_type, report_type or "未知報表")
                 
                 # 写入数据
                 df.to_excel(writer, sheet_name=sheet_name, index=False)
                 
                 # 在第一行插入标题（美观）
                 worksheet = writer.sheets[sheet_name]
-                title = f"{symbol} {quote_name} - {sheet_name} （组织类型: {org_type}）"
+                title = f"{symbol} {quote_name} - {sheet_name} （组织类型: {org_type})"
                 
                 worksheet.insert_rows(1)
                 cell = worksheet['A1']
@@ -341,8 +344,8 @@ async def main():
     # 从数据库读取数据
     file_path = await save_financial_reports_to_excel(
         symbol=symbol,
-        db_path=settings.DB_PATH,
-        folder_path=settings.DEFAULT_EXPORT_DIR,
+        db_path=str(settings.DB_PATH),
+        folder_path=str(settings.DEFAULT_EXPORT_DIR),
         use_db=True  # 从数据库读取
     )
 

@@ -35,26 +35,26 @@ const FinancialDashboard = () => {
   const displayError = error || financialError || quoteError || performanceError;
 
   return (
-  <div className="min-h-screen bg-[#0a0f1c] text-slate-200 font-sans">
-    {/* 全局背景網格（可選，更有終端感） */}
-    {/* <div className="fixed inset-0 bg-[linear-gradient(to_right,#1a2333_1px,transparent_1px),linear-gradient(to_bottom,#1a2333_1px,transparent_1px)] bg-size-[40px_40px] opacity-40 pointer-events-none" /> */}
+  <div className="min-h-screen bg-[#0a0f1c] text-slate-200">
+   
+      {/* Sticky Header */}
+    <header className="sticky top-0 z-50">
+      <SearchBar
+        onSearch={handleSearch}
+        onSync={handleSync}
+        onDownload={handleDownload}
+        symbol={symbol}
+        loading={loading}
+        error={displayError}
+      />
+    </header>
 
-    <div className="relative p-6 max-w-7xl mx-auto">
-      {/* 搜索欄區域 */}
-      <div className="mb-8">
-        <SearchBar
-          onSearch={handleSearch}
-          onSync={handleSync}
-          onDownload={handleDownload}
-          symbol={symbol}
-          loading={loading}
-          error={displayError}
-        />
-      </div>
+    {/* Main Content */}
+    <main className="px-6 py-6 space-y-6">  
 
       {/* 行情頭部  */}
       {quote && (
-        <div className="glass-panel mb-6 p-6 rounded-2xl border border-white/10 backdrop-blur-xl bg-black/40 shadow-2xl shadow-cyan-500/10">
+        <div className="glass-panel mb-6 p-6 rounded-2xl ring-1 ring-cyan-500/10 border border-cyan-500/20 backdrop-blur-md bg-black/40 shadow-2xl shadow-[0_0_40px_rgba(0,255,255,0.06)]">
           <DashboardHeader quote={quote} />
         </div>
       )}
@@ -78,7 +78,7 @@ const FinancialDashboard = () => {
       {data.length > 0 && (
         <BloombergChart data={data} />
       )}
-    </div>
+    </main>
   </div>
 );
 };

@@ -40,7 +40,7 @@
                     "total_compre_income_atsopc": "归属于母公司股东的综合收益总额",
                     "total_compre_income_atms": "归属于少数股东的综合收益总额"
     },
-                "income2": {
+    "income2": {
                     "report_date": "报告期",
                     "total_revenue": "营业总收入",
                     "interest_net_income": "利息净收入",
@@ -78,7 +78,7 @@
                     "total_compre_income_atsopc": "归属于母公司股东的综合收益总额",
                     "total_compre_income_atms": "归属于少数股东的综合收益总额"
     },
-                "income3": {
+    "income3": {
                     "report_date": "报告期",
                     "total_revenue": "营业总收入",
                     "earned_premium": "已赚保费",
@@ -125,7 +125,7 @@
                     "total_compre_income_atsopc": "归属于母公司股东的综合收益总额",
                     "total_compre_income_atms": "归属于少数股东的综合收益总额"
     },
-                "income4": {
+    "income4": {
                     "report_date": "报告期",
                     "total_revenue": "营业总收入",
                     "commi_net_income": "手续费及佣金净收入",
@@ -163,7 +163,7 @@
                     "total_compre_income_atsopc": "归属于母公司股东的综合收益总额",
                     "total_compre_income_atms": "归属于少数股东的综合收益总额"
     },
-                "balance1": {
+    "balance1": {
                     "report_date": "报告期",
                     "currency_funds": "货币资金",
                     "tradable_fnncl_assets": "交易性金融资产",
@@ -248,7 +248,7 @@
                     "total_holders_equity": "股东权益合计",
                     "total_liab_and_holders_equity": "负债和股东权益总计"
     },
-                "balance2": {
+    "balance2": {
                     "report_date": "报告期",
                     "central_bank_cash_and_deposit": "现金及存放中央银行款项",
                     "interbank_storage": "存放同业款项",
@@ -304,7 +304,7 @@
                     "total_holders_equity": "股东权益合计",
                     "total_liab_and_holders_equity": "负债和股东权益总计"
     },
-                "balance3": {
+    "balance3": {
                     "report_date": "报告期",
                     "currency_funds": "货币资金",
                     "lending_fund": "拆出资金",
@@ -378,7 +378,7 @@
                     "total_holders_equity": "股东权益合计",
                     "total_liab_and_holders_equity": "负债和股东权益总计"
     },
-                "balance4": {
+    "balance4": {
                     "report_date": "报告期",
                     "currency_funds": "货币资金",
                     "customer_fund_deposit": "其中：客户资金存款",
@@ -440,7 +440,7 @@
                     "total_holders_equity": "股东权益合计",
                     "total_liab_and_holders_equity": "负债和股东权益总计"
     },
-                "cash1": {
+    "cash1": {
                     "report_date": "报告期",
                     "cash_received_of_sales_service": "销售商品、提供劳务收到的现金",
                     "refund_of_tax_and_levies": "收到的税费返还",
@@ -481,7 +481,7 @@
                     "initial_balance_of_cce": "加：期初现金及现金等价物余额",
                     "final_balance_of_cce": "期末现金及现金等价物余额"
     },
-                "cash2": {
+    "cash2": {
                     "report_date": "报告期",
                     "deposit_and_interbank_net_add": "客户存款和同业存放款项净增加额",
                     "borrowing_net_add_central_bank": "向中央银行借款净增加额",
@@ -526,7 +526,7 @@
                     "initial_balance_of_cce": "加：期初现金及现金等价物余额",
                     "final_balance_of_cce": "期末现金及现金等价物余额"
     },
-                "cash3": {
+    "cash3": {
                     "report_date": "报告期",
                     "cash_received_from_orig_ic": "收到原保险合同保费取得的现金",
                     "net_cash_received_from_rein": "收到再保业务现金净额",
@@ -573,7 +573,7 @@
                     "initial_balance_of_cce": "加：期初现金及现金等价物余额",
                     "final_balance_of_cce": "期末现金及现金等价物余额"
     },
-                "cash4": {
+    "cash4": {
                     "report_date": "报告期",
                     "naa_of_disposal_fnncl_assets": "处置交易性金融资产净增加额",
                     "cash_received_of_interest_etc": "收取利息、手续费及佣金的现金",

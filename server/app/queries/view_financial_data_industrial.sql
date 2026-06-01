@@ -161,7 +161,7 @@ financial_ratios AS (
 
         -- 2. 短期防爆雷：现金短期债务比 (硬通货对短期有息负债的覆盖程度)
         CASE 
-            WHEN st_loan > 0 THEN ROUND(currency_funds / st_loan, 2)
+            WHEN st_loan > 0 THEN ROUND(currency_funds / (st_loan + noncurrent_liab_due_in1y), 2)
             WHEN st_loan = 0 THEN 999.99 -- 无短期借款，处于绝对安全状态
         END AS cash_to_st_debt_ratio,
 

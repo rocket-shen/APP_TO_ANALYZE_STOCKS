@@ -12,7 +12,7 @@ from app.core.config import settings
 
 # 正確引入 router（根據你目前結構調整）
 from app.api.v1.endpoints.get_financial_data import router as financial_data_router  
-from app.utils.xq_cookies import XueqiuCookieManager
+from app.utils.xq_a_token import XueqiuCookieManager
 
 # 全域 logger
 logger = logging.getLogger(__name__)
@@ -57,7 +57,7 @@ async def lifespan(app: FastAPI):
     try:
         logger.info("[Startup] 正在初始化 Xueqiu Cookie Manager...")
         # 強制刷新一次 cookies，確保後續請求可用
-        await XueqiuCookieManager.refresh_cookie()     # ← 關鍵初始化
+        # await XueqiuCookieManager.refresh_cookie()     # ← 關鍵初始化
         cookies = await XueqiuCookieManager.get_cookies()
         logger.info(f"[Startup] Xueqiu Cookie 初始化完成，共有 {len(cookies)} 個 cookies")
     except Exception as e:
@@ -113,4 +113,4 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+    uvicorn.run(app, host="127.0.0.1", port=8000, loop="asyncio", reload=True)

@@ -19,6 +19,8 @@ WITH base_data AS (
         CAST(json_extract(i.raw_json, '$.manage_fee[0]') AS REAL)            AS manage_fee,
         CAST(json_extract(i.raw_json, '$.rad_cost[0]') AS REAL)              AS rad_cost,
         CAST(json_extract(i.raw_json, '$.financing_expenses[0]') AS REAL)    AS financing_expenses,
+        CAST(json_extract(i.raw_json, '$.finance_cost_interest_fee[0]') AS REAL)    AS finance_cost_interest_fee,
+        CAST(json_extract(i.raw_json, '$.profit_total_amt[0]') AS REAL)    AS profit_total_amt,
         CAST(json_extract(i.raw_json, '$.net_profit[0]') AS REAL)            AS net_profit,
         CAST(json_extract(i.raw_json, '$.net_profit[1]') AS REAL)            AS net_profit_yoy,
         CAST(json_extract(i.raw_json, '$.net_profit_atsopc[0]') AS REAL)     AS net_profit_atsopc,
@@ -92,7 +94,7 @@ financial_ratios AS (
         COALESCE(fixed_asset_sum, 0)       AS fixed_asset_sum,       -- 固定资产
         COALESCE(intangible_assets, 0)  AS intangible_assets,  -- 无形资产
 
-        -- 🌟 [刚性有息负债汇总]
+        -- 🌟 [有息负债汇总]
         -- 有息负债 = 短期借款 + 一年内到期的非流动负债 + 长期借款 + 应付债券
         ROUND(
             COALESCE(st_loan, 0) + 
@@ -171,7 +173,13 @@ financial_ratios AS (
             (COALESCE(bp_and_ap, 0) + COALESCE(contract_liabilities, 0)) -- 占下游的钱 (应付+预收)
             - 
             (COALESCE(ar_and_br, 0) + COALESCE(contractual_assets, 0) + COALESCE(pre_payment, 0)) -- 被上游占的钱 (应收+合同资产+预付)
-        , 2) AS net_supply_chain_capital_occupied
+        , 2) AS net_supply_chain_capital_occupied,
+
+        -- 4. 利息保障倍数（EBITDA / 利息费用），衡量盈利对利息的覆盖能力，越高越安全
+        CASE 
+            WHEN finance_cost_interest_fee > 0 THEN ROUND((profit_total_amt + finance_cost_interest_fee) / finance_cost_interest_fee, 2)
+            ELSE NULL
+        END AS interest_coverage_ratio
 
     FROM lag_data
 )

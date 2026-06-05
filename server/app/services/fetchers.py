@@ -5,10 +5,9 @@ import logging
 from datetime import datetime
 # === 新結構導入 ===
 from app.core.config import settings
-from app.utils.xq_cookies import XueqiuCookieManager   # 建議把 utils 移到 app/utils/
+from app.utils.xq_a_token import XueqiuCookieManager
 
 logger = logging.getLogger(__name__)
-
 
 async def fetch_xq_data(symbol: str, report_type: str) -> list[dict]:
     """
@@ -39,17 +38,21 @@ async def fetch_xq_data(symbol: str, report_type: str) -> list[dict]:
         "timestamp": int(round(time.time() * 1000))
     }
 
+    cookies = await XueqiuCookieManager.get_cookies()  # 获取 cookies（可能是从缓存，也可能是新获取的）
+    headers = XueqiuCookieManager.HEADERS.copy()
+    headers.update({
+        "Origin": "https://xueqiu.com",
+        "Referer": f"https://xueqiu.com/snowman/S/{symbol}/detail"
+    })
+
     async with httpx.AsyncClient(timeout=settings.TIMEOUT) as client:
         try:
             # 獲取 cookies
-            cookies: httpx.Cookies = await XueqiuCookieManager.get_cookies()
+            # cookies: httpx.Cookies = await XueqiuCookieManager.get_cookies()
 
-            resp = await client.get(
-                url, 
-                headers=XueqiuCookieManager.HEADERS,
-                cookies=cookies,
-                params=params
-            )
+            resp = await client.get(url, headers=headers, cookies=cookies, params=params)
+            if resp.status_code != 200:
+                logger.warning(f"Response body: {resp.text[:400]}")
             resp.raise_for_status()
             
             payload = resp.json().get("data", {})
@@ -87,31 +90,22 @@ async def fetch_xq_quote(symbol: str) -> dict:
     獲取雪球的股票報價數據
     """
     cookies = await XueqiuCookieManager.get_cookies()
+    headers = XueqiuCookieManager.HEADERS.copy()
 
-    headers = {
-        "User-Agent": (
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/124.0.0.0 Safari/537.36"
-        ),
-        "Referer": f"https://xueqiu.com/S/{symbol}",
-        "Accept": (
-            "text/html,application/xhtml+xml,application/xml;q=0.9,"
-            "image/avif,image/webp,*/*;q=0.8"
-        ),
-        "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
-        "Connection": "keep-alive",
-        "DNT": "1",
-    }
+    headers.update({
+        "Origin": "https://xueqiu.com",
+        "Referer": f"https://xueqiu.com/S/{symbol}"
+    })
 
     url = f"https://stock.xueqiu.com/v5/stock/quote.json?symbol={symbol}&extend=detail"
 
-    async with httpx.AsyncClient(
-        headers=XueqiuCookieManager.HEADERS,
-        cookies=cookies,
-        timeout=settings.TIMEOUT,
-    ) as client:
-        resp = await client.get(url)
+    async with httpx.AsyncClient(timeout=settings.TIMEOUT, verify=True) as client:
+        resp = await client.get(url, headers=headers, cookies=cookies)
+        
+        logger.info(f"[Quote] Status: {resp.status_code} for {symbol}")
+        if resp.status_code != 200:
+            logger.warning(f"Response: {resp.text[:500]}")
+        
         resp.raise_for_status()
-        data = resp.json().get("data", {}).get("quote", {})
-        return data
+        return resp.json().get("data", {}).get("quote", {})
+    

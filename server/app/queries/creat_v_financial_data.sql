@@ -17,12 +17,13 @@ WITH base_data AS (
         CAST(json_extract(i.raw_json, '$.manage_fee[0]') AS REAL)       AS manage_fee,
         CAST(json_extract(i.raw_json, '$.rad_cost[0]') AS REAL)       AS rad_cost,
         CAST(json_extract(i.raw_json, '$.financial_expense[0]') AS REAL)    AS financial_expense,
-
+        CAST(json_extract(i.raw_json, '$.finance_cost_interest_fee[0]') AS REAL)    AS finance_cost_interest_fee,
         CAST(json_extract(i.raw_json, '$.net_profit[0]') AS REAL)           AS net_profit,
         CAST(json_extract(i.raw_json, '$.net_profit[1]') AS REAL)           AS net_profit_yoy,
         CAST(json_extract(i.raw_json, '$.net_profit_atsopc[0]') AS REAL)    AS net_profit_atsopc,
         CAST(json_extract(i.raw_json, '$.asset_impairment_loss[0]') AS REAL)    AS asset_impairment_loss,
         CAST(json_extract(i.raw_json, '$.credit_impairment_loss[0]') AS REAL)    AS credit_impairment_loss,
+        CAST(json_extract(i.raw_json, '$.profit_total_amt[0]') AS REAL)    AS profit_total_amt,
 
         -- 资产负债表
         CAST(json_extract(b.raw_json, '$.asset_liab_ratio[0]') AS REAL)     AS asset_liab_ratio_raw,

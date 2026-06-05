@@ -1,22 +1,18 @@
-#  -- filepath: server/app/utils/xq_cookies.py
+# --filepath--: server/app/utils/manual_xq_cookies.py
 import time
 import asyncio
 import logging
 import traceback
 from typing import Optional
-
 import httpx
 
-
 logger = logging.getLogger(__name__)
-
 
 class XueqiuCookieManager:
     
     _cookies: Optional[httpx.Cookies] = None
     _last_update: float = 0
-    _ttl: int = 3000
-
+    _ttl: int = 3600  # 改成1小時，手動更新後比較久
     _lock = asyncio.Lock()
 
     HEADERS = {
@@ -35,17 +31,35 @@ class XueqiuCookieManager:
         "DNT": "1",
     }
 
+    # === 新增：手動設定 Token ===
+    _manual_token: Optional[str] = None
+
+    @classmethod
+    def set_manual_token(cls, cookie_string: str):
+        """從瀏覽器複製整串 Cookie 後，傳入這裡"""
+        cls._manual_token = cookie_string
+        cls._cookies = httpx.Cookies()
+        # 解析 cookie 字串
+        for item in cookie_string.split(';'):
+            item = item.strip()
+            if '=' in item:
+                k, v = item.split('=', 1)
+                cls._cookies.set(k, v)
+        cls._last_update = time.time()
+        logger.info("[XueqiuAuth] ✅ 已手動設定 Cookie")
+        logger.info(f"包含 xq_a_token: {bool(cls._cookies.get('xq_a_token'))}")
+
     @classmethod
     async def get_cookies(cls) -> httpx.Cookies:
+        if cls._manual_token:
+            return cls._cookies or httpx.Cookies()
+        
+        # 原有自動刷新邏輯（目前效果差，先保留）
         now = time.time()
         if cls._cookies is None or (now - cls._last_update) > cls._ttl:
             async with cls._lock:
                 if cls._cookies is None or (now - cls._last_update) > cls._ttl:
-                    for attempt in range(2):  # 最多重试1次
-                        success = await cls.refresh_cookie()
-                        if success:
-                            break
-                        await asyncio.sleep(1)
+                    await cls.refresh_cookie()
         
         return cls._cookies or httpx.Cookies()
 
@@ -89,13 +103,3 @@ class XueqiuCookieManager:
             logger.error(traceback.format_exc())
         
         return False
-
-    @classmethod
-    def clear_cache(cls):
-        """
-        清除缓存
-        """
-        cls._cookies = None
-        cls._last_update = 0
-
-        logger.info("[XueqiuAuth] Cookie cache cleared")

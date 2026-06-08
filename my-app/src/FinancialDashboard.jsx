@@ -38,7 +38,7 @@ const FinancialDashboard = () => {
   <div className="min-h-screen bg-[#0a0f1c] text-slate-200">
    
       {/* Sticky Header */}
-    <header className="sticky top-0 z-50">
+    <header className="sticky top-0 z-50 w-full bg-white/20 backdrop-blur-md border-b border-white/30 shadow-sm py-2 px-4">
       <SearchBar
         onSearch={handleSearch}
         onSync={handleSync}

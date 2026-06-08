@@ -27,13 +27,13 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
 
 
   return (
-    <div className="max-w-4xl mx-auto mb-10 text-center">
-    <h1 className="text-3xl font-extrabold mb-6 text-slate-300">A股上市公司財務數據儀表板</h1>
+    <div className="max-w-4xl mx-auto mb-6 text-center">
+    <h1 className="text-xl font-extrabold mb-3 text-red-500 tracking-wide">A股上市公司財務數據儀表板</h1>
     <div className="flex gap-2 max-w-md mx-auto">
       <input
         type="text"
         placeholder="输入股票代码 (如: SH600519)"
-        className="flex-1 px-4 py-3 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+        className="flex-1 px-3 py-2.5 rounded-lg border border-slate-200/60 bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all placeholder:text-slate-400 text-slate-800"
         value={inputSymbol}
         onChange={(e) => setInputSymbol(e.target.value.toUpperCase())}
         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -42,9 +42,9 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
       <button
         onClick={handleSearch}
         disabled={loading}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:bg-blue-300"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:bg-blue-300"
       >
-        {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <Search className="w-5 h-5" />}
+        {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Search className="w-4 h-4" />}
         查询
       </button>
 
@@ -55,9 +55,9 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
               onClick={handleSyncClick}
               disabled={loading}
               title="同步最新財務數據"
-              className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md"
+              className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
             >
-              <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">更新</span>
             </button>
 
@@ -66,15 +66,15 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
               onClick={handleDownload}
               disabled={loading || !symbol}
               title="下載 Excel 財務報表"
-              className="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white px-4 py-3 rounded-lg flex items-center gap-2 transition-all shadow-md"
+              className="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
             >
-              <Download className="w-5 h-5" />
+              <Download className="w-4 h-4" />
               <span className="hidden sm:inline">下載</span>
             </button>
           </>
         )}
     </div>
-    {error && <p className="mt-3 text-red-500 text-sm">{error}</p>}
+    {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
   </div>
 );
 };

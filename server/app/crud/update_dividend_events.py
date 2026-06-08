@@ -63,7 +63,7 @@ def update_dividend_events(
     df_cleaned = df[available_cols].copy()
     df_cleaned.rename(columns=column_mapping, inplace=True)
 
-    # 【核心修复】手动注入接口缺失的股票代码和股票名称
+    # 手动注入接口缺失的股票代码和股票名称
     df_cleaned["stock_code"] = symbol
     df_cleaned["stock_name"] = stock_name
 

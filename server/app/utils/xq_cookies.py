@@ -99,3 +99,16 @@ class XueqiuCookieManager:
         cls._last_update = 0
 
         logger.info("[XueqiuAuth] Cookie cache cleared")
+
+if __name__ == "__main__":
+    # 直接运行此脚本来测试刷新功能
+    async def test_refresh():
+        success = await XueqiuCookieManager.refresh_cookie()
+        if success:
+            print("✅ Cookie refreshed successfully!")
+        else:
+            print("❌ Failed to refresh cookie.")
+
+    asyncio.run(test_refresh())
+
+    

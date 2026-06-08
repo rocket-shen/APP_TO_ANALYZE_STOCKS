@@ -14,17 +14,23 @@ export const useDownloadExcel = () => {
         { method: 'GET' }
       );
 
-      if (!response.ok) throw new Error('下載失敗');
-
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
       a.download = `${targetSymbol}_財務報表.xlsx`;
+      a.style.display = 'none';
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      // 延遲一點再清理（更穩定）
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }, 100);
 
       alert(`${targetSymbol} 財務報表下載成功！`);
     } catch (err) {

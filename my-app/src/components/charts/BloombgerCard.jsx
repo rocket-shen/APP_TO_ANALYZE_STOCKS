@@ -86,7 +86,7 @@ export default function BloombergChart({data}) {
 
   const toBillion = (val) => (val / 1e8).toFixed(1);
   return (
-    <div className="glass-panel mt-8 mb-8 p-6 rounded-2xl border border-white/10 backdrop-blur-xl font-mono min-h-screen bg-slate-900 shadow-2xl shadow-cyan-500/10">
+    <div className="glass-panel mt-8 mb-8 p-6 rounded-2xl border border-white/10 backdrop-blur-xl font-mono bg-slate-900 shadow-2xl shadow-cyan-500/10 w-full min-h-[800px]">
       
       {/* 顶栏控制台风格 Header */}
       <div style={{ borderBottom: `2px solid ${BB_COLORS.blue}`, paddingBottom: '10px', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
@@ -104,7 +104,7 @@ export default function BloombergChart({data}) {
       {/* 四宫格看盘核心布局 */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(550px, 1fr))', gap: '20px' }}>
         
-        {/* CHARATER 1: 盈利质量与造血背离分析 (关键：看净利润与自由现金流是否同步) */}
+        {/* 1: 盈利质量与造血背离分析 (关键：看净利润与自由现金流是否同步) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             1. EARNINGS & CASH DIVERGENCE (营收、利润与自由现金流)
@@ -125,7 +125,7 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* CHARATER 净利润VS自由现金流 */}
+        {/* 2: 净利润VS自由现金流 */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             NET_PROFIT & CASH DIVERGENCE (净利润与自由现金流)
@@ -154,7 +154,7 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* CHARATER  自由现金流 (FCF) 绝对值变动 */}
+        {/* 3: 自由现金流 (FCF) 绝对值变动 */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             FCF CASH-FLOW & DEBT CONVERGENCE ANALYSIS
@@ -245,10 +245,10 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* CHARATER 2: 风险防御垫与减值分析 (关键：看现金能否覆盖短债，减值是否吞噬营收) */}
+        {/* 4: 风险防御垫与减值分析 (关键：看现金能否覆盖短债，减值是否吞噬营收) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
-            2. CREDIT RISK & IMPAIRMENT MONITOR (暴雷防线与资产减值)
+            4. CREDIT RISK & IMPAIRMENT MONITOR (暴雷防线与资产减值)
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -270,10 +270,10 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* CHARATER 3: 供应链资本占用分析 (关键：零轴线之上的正数代表免费白嫖上下游资金) */}
+        {/* 5: 供应链资本占用分析 (关键：零轴线之上的正数代表免费白嫖上下游资金) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.green}`, paddingLeft: '8px' }}>
-            3. SUPPLY CHAIN MOAT (正负零轴：净占用上下游资金差额)
+            5. SUPPLY CHAIN MOAT (正负零轴：净占用上下游资金差额)
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -306,10 +306,10 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* CHARATER 4: 资产运营效率修正走势 (关键：平均值修正后的应收及存货周转效率) */}
+        {/* 6: 资产运营效率修正走势 (关键：平均值修正后的应收及存货周转效率) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
-            4. ASSET TURNOVER EFFICIENCY (均值修正：应收及存货周转率)
+            6. ASSET TURNOVER EFFICIENCY (均值修正：应收及存货周转率)
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -328,7 +328,7 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* 1. 三大核心利润率走势 (ROE、毛利率、净利率走势图) */}
+        {/* 7. 三大核心利润率走势 (ROE、毛利率、净利率走势图) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             5. PROFITABILITY MARGIN TRENDS (净资产收益率、毛利率、净利率 %)
@@ -352,10 +352,10 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* 2. 核心利润 与 净利润 对比图 (柱线混排，看非经常损益或利息的剥离) */}
+        {/* 8. 核心利润 与 净利润 对比图 (柱线混排，看非经常损益或利息的剥离) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.green}`, paddingLeft: '8px' }}>
-            6. CORE PROFIT VS NET PROFIT (核心主营利润与最终净利润对比)
+            8. CORE PROFIT VS NET PROFIT (核心主营利润与最终净利润对比)
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -374,14 +374,14 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* 3. 资产状况：固定资产、无形资产与总资产 (专业堆叠图) */}
+        {/* 9. 资产状况：固定资产、无形资产与总资产 (专业堆叠图) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.cyan}`, paddingLeft: '8px' }}>
-            7. ASSET COMPOSITION ANALYSIS (总资产重轻资产分布结构)
+            9. ASSET COMPOSITION ANALYSIS (总资产重轻资产分布结构)
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
+              <ComposedChart data={data} margin={{ top: 10, right: 20, left: -15, bottom: 0 }}>
                 <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
                 <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`}/>
@@ -397,10 +397,10 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* 4. 负债状况：有息负债与总负债 (透视核心债务风险) */}
+        {/* 10. 负债状况：有息负债与总负债 (透视核心债务风险) */}
         <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
-            8. DEBT RISK PROFILE (有息负债占总负债比重与违约隐患)
+            10. DEBT RISK PROFILE (有息负债占总负债比重与违约隐患)
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
@@ -412,8 +412,28 @@ export default function BloombergChart({data}) {
                 <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
                 
                 {/* 有息负债（通常包含短期借款 st_loan、长期借款等）用深浅不同的红色堆叠和衬托，看刚性债务占比 */}
-                <Bar dataKey="interest_bearing_liab" name="刚性有息负债" fill={BB_COLORS.liab2} maxBarSize={45} />
+                <Bar dataKey="interest_bearing_liab" name="有息负债" fill={BB_COLORS.liab2} maxBarSize={45} />
                 <Line type="linear" dataKey="total_liab" name="总负债" stroke={BB_COLORS.red} strokeWidth={2} dot={{ r: 3 }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* 11: 利息保障倍数（EBITDA / 利息费用），衡量盈利对利息的覆盖能力，越高越安全 */}
+        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
+            11. 利息保障倍数（EBITDA / 利息费用）, (衡量盈利对利息的覆盖能力)
+          </h2>
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <ComposedChart data={data} margin={{ top: 10, right: -20, left: -20, bottom: 0 }}>
+                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+                <YAxis stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} />
+                <Tooltip content={<BloombergTooltip />} />
+                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+                <Area type="monotone" dataKey="interest_coverage_ratio" name="利息保障倍数" fill={BB_COLORS.blue} stroke={BB_COLORS.blue} fillOpacity={0.15} />
+                <ReferenceLine y={1} stroke={BB_COLORS.blue} strokeWidth={1} opacity={0.4} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

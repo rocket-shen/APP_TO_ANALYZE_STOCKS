@@ -1,5 +1,5 @@
 // filepath: my-app/src/components/dashboard/FinancialTable.jsx
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 
 // 字段映射字典，方便后续维护或修改表头文字
 const FIELD_LABELS = {
@@ -19,6 +19,25 @@ const FIELD_LABELS = {
 };
 
 const FinancialTable = ({ data = [] }) => {
+  const [activeQuarter, setActiveQuarter] = useState('Q4'); // 預設顯示四季報
+
+  // 根據 report_date 判斷季度
+  const getQuarter = (reportDate) => {
+    if (!reportDate) return 'Q4';
+    const month = reportDate.substring(5, 7); // 取出 MM
+    if (month === '03') return 'Q1';
+    if (month === '06') return 'Q2';
+    if (month === '09') return 'Q3';
+    return 'Q4'; // 12月視為四季報/年報
+  };
+
+  // 過濾出當前季度資料（保持時間倒序）
+  const filteredData = useMemo(() => {
+    return data
+      .filter(item => getQuarter(item.report_date) === activeQuarter)
+      .sort((a, b) => b.report_date.localeCompare(a.report_date)); // 確保最新在前
+  }, [data, activeQuarter]);
+
   if (data.length === 0) {
     return (
       <div className="text-center py-8 text-slate-500">
@@ -50,8 +69,8 @@ const FinancialTable = ({ data = [] }) => {
   return (
     <div className="mt-4 w-full glass-panel border border-white/10 backdrop-blur-xl bg-black/40 rounded-2xl shadow-2xl overflow-hidden">
       {/* 头部信息区 */}
-      <div className="px-3 py-2 border-b border-white/5 bg-white/2 flex justify-between items-center">
-        <div>
+      <div className="px-3 py-2 border-b border-white/5 bg-white/2 flex justify-between items-center gap-4">
+        <div className="flex-shrink-0">
           <h3 className="text-lg font-semibold text-white">
             {data[0]?.stock_name} ({data[0]?.code})
           </h3>
@@ -59,10 +78,42 @@ const FinancialTable = ({ data = [] }) => {
             行业分类：<span className="text-cyan-400">{data[0]?.industry}</span>
           </p>
         </div>
+        {/* 季度切換按鈕 */}
+        <div className="flex gap-1 bg-slate-900/50 p-1 rounded-xl border border-white/10">
+          {[
+            { label: '一季報', value: 'Q1' },
+            { label: '二季報', value: 'Q2' },
+            { label: '三季報', value: 'Q3' },
+            { label: '四季報', value: 'Q4' },
+          ].map(({ label, value }) => (
+            <button
+              key={value}
+              onClick={() => setActiveQuarter(value)}
+              className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-all ${
+                activeQuarter === value
+                  ? 'bg-cyan-500 text-black shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
         <span className="text-xs px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-mono">
-          历史年报 (展示 {data.length} 期)
+          历史财报 (共 {data.length} 期)
         </span>
       </div>
+      
+      <div className="mt-2 text-xs text-slate-400 flex items-center gap-2">
+          當前顯示：
+          <span className="text-cyan-400 font-medium">
+            {activeQuarter === 'Q1' && '第一季度報告'}
+            {activeQuarter === 'Q2' && '第二季度報告'}
+            {activeQuarter === 'Q3' && '第三季度報告'}
+            {activeQuarter === 'Q4' && '第四季度報告（年報）'}
+          </span>
+          <span className="text-slate-500">（共 {filteredData.length} 期）</span>
+        </div>
 
       {/* 表格滚动容器 */}
       <div className="overflow-x-auto">
@@ -85,7 +136,7 @@ const FinancialTable = ({ data = [] }) => {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/3 text-sm">
-            {data.map((item, index) => (
+            {filteredData.map((item, index) => (
               <tr 
                 key={item.report_date + index} 
                 className="hover:bg-white/2 transition-colors group"

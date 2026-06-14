@@ -306,24 +306,52 @@ export default function BloombergChart({data}) {
           </div>
         </div>
 
-        {/* 6: 资产运营效率修正走势 (关键：平均值修正后的应收及存货周转效率) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        {/* 6-1: 库存周转效率 (双Y轴：折线=周转率，柱状=库存) */}
+        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633', marginBottom: '20px' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
-            6. ASSET TURNOVER EFFICIENCY (均值修正：应收及存货周转率)
+            6-1. INVENTORY TURNOVER (库存周转率 & 库存金额)
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
-              <LineChart data={data} margin={{ top: 10, right: -15, left: -20, bottom: 0 }}>
+              <ComposedChart data={data} margin={{ top: 10, right: -25, left: -10, bottom: 0 }}>
                 <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`}/>
                 <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.amber} tick={{ fontSize: 11 }} />
                 <Tooltip content={<BloombergTooltip />} />
                 <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+
+                {/* 柱状图 - 库存金额（左轴） */}
+                <Bar yAxisId="left" dataKey="inventory" name="库存金额" fill={BB_COLORS.blue} barSize={20} opacity={0.7} />
                 
-                <Line type="linear" yAxisId="left" dataKey="ar_turnover" name="应收账款周转率(次)" stroke={BB_COLORS.blue} strokeWidth={2} dot={{ r: 3 }} />
-                <Line type="linear" yAxisId="right" dataKey="inventory_turnover" name="存货周转率(次)" stroke={BB_COLORS.amber} strokeWidth={2} dot={{ r: 3 }} />
-              </LineChart>
+                {/* 折线图 - 库存周转率（右轴） */}
+                <Line type="linear" yAxisId="right" dataKey="inventory_turnover" name="库存周转率(次)" stroke={BB_COLORS.amber} strokeWidth={3} dot={{ r: 4 }} />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* 6-2: 应收账款周转效率 (双Y轴：折线=周转率，柱状=应收账款) */}
+        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
+            6-2. ACCOUNTS RECEIVABLE TURNOVER (应收周转率 & 应收账款)
+          </h2>
+          <div style={{ width: '100%', height: 300 }}>
+            <ResponsiveContainer>
+              <ComposedChart data={data} margin={{ top: 10, right: -25, left: -10, bottom: 0 }}>
+                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`}/>
+                <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.amber} tick={{ fontSize: 11 }} />
+                <Tooltip content={<BloombergTooltip />} />
+                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+
+                {/* 柱状图 - 应收账款（左轴） */}
+                <Bar yAxisId="left" dataKey="ar_and_br" name="应收账款" fill={BB_COLORS.blue} barSize={20} opacity={0.7} />
+                
+                {/* 折线图 - 应收周转率（右轴） */}
+                <Line type="linear" yAxisId="right" dataKey="ar_turnover" name="应收账款周转率(次)" stroke={BB_COLORS.amber} strokeWidth={3} dot={{ r: 4 }} />
+              </ComposedChart>
             </ResponsiveContainer>
           </div>
         </div>

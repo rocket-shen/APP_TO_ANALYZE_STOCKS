@@ -79,13 +79,15 @@ financial_ratios AS (
         stock_name,
         report_date,
         
-        -- [基础规模指标]
+        -- [基础指标]
         total_revenue,
         revenue,
         revenue_yoy,
         net_profit,
         net_profit_yoy,
-        net_profit_atsopc,  
+        net_profit_atsopc, 
+        inventory, 
+        ar_and_br,
         total_assets,
         total_liab,
         net_cash_flow_operating,

@@ -1,8 +1,11 @@
 #  -- filepath: server/app/utils/xueqiu_daily.py
+import datetime
+import random
 import httpx
 import asyncio
 import logging
 import csv
+import io
 import os
 import aiofiles  # 需要安装: pip install aiofiles
 from typing import List, Dict, Any
@@ -13,52 +16,94 @@ from app.utils.xq_a_token import XueqiuCookieManager
 
 logger = logging.getLogger(__name__)
 
+XUEQIU_FIELD_MAP = {
+    "symbol": "股票代码",
+    "name": "股票名称",
+    "current": "当前价",
+    "chg": "涨跌额",
+    "percent": "涨跌幅(%)",
+    "current_year_percent": "今年以来涨跌幅(%)",
+    "volume": "成交量",
+    "amount": "成交额",
+    "turnover_rate": "换手率(%)",
+    "volume_ratio": "量比",
+    "amplitude": "振幅(%)",
+    "limitup_days": "昨日连板天数",
+    "pe_ttm": "市盈率(TTM)",
+    "pb_ttm": "市净率(TTM)",
+    "pb": "市净率",
+    "ps": "市销率",
+    "pcf": "市现率",
+    "roe_ttm": "净资产收益率(ROE/TTM)",
+    "eps": "每股收益(EPS)",
+    "net_profit_cagr": "净利润增长率(CAGR)",
+    "income_cagr": "营收增长率(CAGR)",
+    "dividend_yield": "股息率(%)",
+    "market_capital": "总市值",
+    "float_market_capital": "流通市值",
+    "total_shares": "总股本",
+    "float_shares": "流通股本",
+    "main_net_inflows": "主力净流入",
+    "north_net_inflow": "北向资金净流入",
+    "north_net_inflow_time": "北向流入时间",
+    "followers": "关注人数",
+    "issue_date_ts": "上市日期戳",
+    "first_percent": "首日涨跌幅(%)",
+    "total_percent": "累计涨跌幅(%)",
+    "percent5m": "5分钟涨跌幅(%)",
+    "lot_size": "每手股数",
+    "tick_size": "最小价格变动"
+}
+
 async def save_to_csv_async(data: List[Dict[str, Any]], filepath: str):
-    """
-    异步将列表字典数据保存为 CSV 文件。
-    使用 aiofiles 配合标准库 csv 模块，防止大文件 I/O 阻塞事件循环。
-    """
     if not data:
         logger.warning("没有数据需要保存。")
         return
 
-    # 提取 CSV 的表头（所有字典的 key 并集）
-    headers = set()
-    for item in data:
-        headers.update(item.keys())
-    headers = sorted(list(headers))
+    # 1. 引入我们定义好的字段映射表
+    field_map = XUEQIU_FIELD_MAP
 
-    # 确保目录存在
+    # 2. 这里的表头（headers）统一使用映射表里的中文名
+    # 采用固定顺序或按映射表顺序排列，这样导出的 CSV 列顺序更加可控
+    headers = list(field_map.values())
+
+    # 确保文件目录存在
     os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
 
     try:
         # 使用 aiofiles 以异步模式打开文件，指定 utf-8-sig 防止 Excel 打开中文乱码
         async with aiofiles.open(filepath, mode='w', encoding='utf-8-sig', newline='') as f:
-            # 建立一个异步写入代理
-            writer = csv.DictWriter(f, fieldnames=headers)
-            
-            # 由于 DictWriter 内部是同步的，我们可以通过将其转换为字符串或按行写入
-            # 对于几千条的小数据量，也可以直接在 aiofiles 的上下文中利用同步思维配合 await 写入
-            # 这里采用最安全和高兼容性的写入方式：
             
             # 写入表头
             header_str = ",".join([f'"{h}"' for h in headers]) + "\n"
             await f.write(header_str)
             
+            # 3. 将 StringIO 提至循环外复用，避免几千次循环带来的内存开销
+            output = io.StringIO()
+            cw = csv.DictWriter(output, fieldnames=headers)
+            
             # 批量或逐行处理行数据
             for item in data:
-                # 保证所有 field 都在字典里，缺少的填空字符串
-                row_dict = {h: item.get(h, '') for h in headers}
+                # 4. 构建包含中文 Key 的行字典
+                row_dict = {}
+                for eng_key, chn_key in field_map.items():
+                    val = item.get(eng_key)
+                    
+                    # 细节处理：如果雪球返回的是 null (Python中为 None)，转换为空字符串
+                    if val is None:
+                        val = ''
+                        
+                    row_dict[chn_key] = val
                 
-                # 利用内存缓冲转换为单行标准 CSV 文本后再异步写入
-                import io
-                output = io.StringIO()
-                cw = csv.DictWriter(output, fieldnames=headers)
+                # 清空缓冲区，将单行转换为标准 CSV 文本后再异步写入
+                output.seek(0)
+                output.truncate(0)
+                
                 cw.writerow(row_dict)
                 row_str = output.getvalue()
-                output.close()
-                
                 await f.write(row_str)
+            
+            output.close()
                 
         logger.info(f"✅ 数据成功异步保存至 CSV 文件: {filepath}")
     except Exception as e:
@@ -66,7 +111,7 @@ async def save_to_csv_async(data: List[Dict[str, Any]], filepath: str):
         raise e
 
 
-async def fetch_all_xueqiu_stocks_to_csv(output_filepath: str = "data/xueqiu_stocks.csv"):
+async def fetch_xueqiu_daily_to_csv(output_filepath: str ,limit_count: int):
     """
     异步核心函数：使用 XueqiuCookieManager 抓取全量 A 股股票并保存为 CSV 
     """
@@ -90,7 +135,7 @@ async def fetch_all_xueqiu_stocks_to_csv(output_filepath: str = "data/xueqiu_sto
                 "page": page,
                 "size": size,
                 "order": "desc",
-                "order_by": "percent",
+                "order_by": "market_capital",
                 "market": "CN",
                 "type": "sh_sz"
             }
@@ -122,9 +167,14 @@ async def fetch_all_xueqiu_stocks_to_csv(output_filepath: str = "data/xueqiu_sto
                 # 将抓取到的数据加入到主列表中
                 all_stocks.extend(stocks_list)
                 logger.info(f"📊 成功抓取第 {page} 页，当前累计获取 {len(all_stocks)} 只股票")
+
+                # ⭐ 动态判断：数量达到外部传入的 limit_count 时提前结束
+                if len(all_stocks) >= limit_count:
+                    logger.info(f"🎯 已抓取到足够数量的股票（>= {limit_count}只），停止翻页。")
+                    break
                 
                 # 3. 页面间留出微小的非阻塞休眠，防止请求过快被阿里云防火墙拉黑
-                await asyncio.sleep(0.6)
+                await asyncio.sleep(random.uniform(0.5, 0.9))
                 page += 1
                 
             except Exception as e:
@@ -139,7 +189,7 @@ async def fetch_all_xueqiu_stocks_to_csv(output_filepath: str = "data/xueqiu_sto
                 if symbol:
                     unique_stocks[symbol] = stock
             
-            cleaned_data = list(unique_stocks.values())
+            cleaned_data = list(unique_stocks.values())[:limit_count]
             logger.info(f"🧹 去重清洗完成：总数据量由 {len(all_stocks)} 净化为 {len(cleaned_data)} 只股票")
             
             # 5. 调用异步 CSV 保存函数
@@ -153,7 +203,8 @@ async def fetch_all_xueqiu_stocks_to_csv(output_filepath: str = "data/xueqiu_sto
 if __name__ == "__main__":
     # 配置日志输出格式，方便观察进度
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
-    filepath = "D:/雪球数据/xueqiu_daily/20260608.csv"
+    date_str = datetime.datetime.now().strftime("%Y%m%d")
+    filepath = f"D:/雪球数据/xueqiu_daily/{date_str}_xueqiu_daily.csv"
     
     # 执行异步主函数
-    asyncio.run(fetch_all_xueqiu_stocks_to_csv(filepath))
+    asyncio.run(fetch_xueqiu_daily_to_csv(filepath, limit_count=3000))  # 这里的 limit_count 可以根据需要调整，设置为 None 或一个大数表示不限制数量

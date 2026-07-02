@@ -252,7 +252,7 @@ export default function BloombergChart({data}) {
           </h2>
           <div style={{ width: '100%', height: 300 }}>
             <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: -20, left: -20, bottom: 0 }}>
+              <ComposedChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
                 <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
                 <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} />
@@ -307,7 +307,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 6-1: 库存周转效率 (双Y轴：折线=周转率，柱状=库存) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633', marginBottom: '20px' }}>
+        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
             6-1. INVENTORY TURNOVER (库存周转率 & 库存金额)
           </h2>
@@ -457,10 +457,12 @@ export default function BloombergChart({data}) {
               <ComposedChart data={data} margin={{ top: 10, right: -20, left: -20, bottom: 0 }}>
                 <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
                 <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} />
+                <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.red} tick={{ fontSize: 11 }} />
                 <Tooltip content={<BloombergTooltip />} />
                 <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                <Area type="monotone" dataKey="interest_coverage_ratio" name="利息保障倍数" fill={BB_COLORS.blue} stroke={BB_COLORS.blue} fillOpacity={0.15} />
+                <Area yAxisId="left" type="monotone" dataKey="interest_coverage_ratio" name="利息保障倍数" fill={BB_COLORS.blue} stroke={BB_COLORS.blue} fillOpacity={0.15} />
+                <Line yAxisId="right" type="monotone" dataKey="asset_liab_ratio" name="资产负债率(%)" stroke={BB_COLORS.red} strokeWidth={0.5} dot={{ r: 2 }} />
                 <ReferenceLine y={1} stroke={BB_COLORS.blue} strokeWidth={1} opacity={0.4} />
               </ComposedChart>
             </ResponsiveContainer>

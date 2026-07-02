@@ -28,7 +28,6 @@ XUEQIU_FIELD_MAP = {
     "turnover_rate": "换手率(%)",
     "volume_ratio": "量比",
     "amplitude": "振幅(%)",
-    "limitup_days": "昨日连板天数",
     "pe_ttm": "市盈率(TTM)",
     "pb_ttm": "市净率(TTM)",
     "pb": "市净率",
@@ -44,15 +43,10 @@ XUEQIU_FIELD_MAP = {
     "total_shares": "总股本",
     "float_shares": "流通股本",
     "main_net_inflows": "主力净流入",
-    "north_net_inflow": "北向资金净流入",
-    "north_net_inflow_time": "北向流入时间",
     "followers": "关注人数",
     "issue_date_ts": "上市日期戳",
     "first_percent": "首日涨跌幅(%)",
-    "total_percent": "累计涨跌幅(%)",
-    "percent5m": "5分钟涨跌幅(%)",
-    "lot_size": "每手股数",
-    "tick_size": "最小价格变动"
+    "total_percent": "累计涨跌幅(%)"
 }
 
 async def save_to_csv_async(data: List[Dict[str, Any]], filepath: str):
@@ -183,10 +177,23 @@ async def fetch_xueqiu_daily_to_csv(output_filepath: str ,limit_count: int):
         
         # 4. 数据抓取完毕后，进行内存去重与清洗（防止翻页期间因实时排序变动导致的个别重复）
         if all_stocks:
+            import datetime
             unique_stocks = {}
             for stock in all_stocks:
                 symbol = stock.get("symbol")
                 if symbol:
+                    # ---- ⭐ 新增时间戳转换逻辑 ⭐ ----
+                    ts = stock.get("issue_date_ts")
+                    if ts and isinstance(ts, (int, float)):
+                        try:
+                            # 13位毫秒时间戳需要除以 1000 变成 10位秒级时间戳
+                            dt_obj = datetime.datetime.fromtimestamp(ts / 1000)
+                            stock["issue_date_ts"] = dt_obj.strftime("%Y-%m-%d")
+                        except Exception:
+                            stock["issue_date_ts"] = ""  # 如果转换异常，安全地设为空字符串
+                    else:
+                        stock["issue_date_ts"] = ""  # 如果是 None 或 0，设为空字符串
+                    # ----------------------------------
                     unique_stocks[symbol] = stock
             
             cleaned_data = list(unique_stocks.values())[:limit_count]

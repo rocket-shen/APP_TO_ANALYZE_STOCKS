@@ -1,8 +1,6 @@
 DROP VIEW IF EXISTS view_financial_data_industrial;
 CREATE VIEW view_financial_data_industrial AS
 WITH base_data AS (
-    -- ① 统一解析 JSON 并筛选一般工商业企业（使用 income1, balance1, cash1）
-    -- 建议在底层表或此处显式过滤仅属于一般工商业的 symbol，避免混入金融股数据
     SELECT
         i.symbol,
         i.stock_name,
@@ -39,6 +37,7 @@ WITH base_data AS (
         CAST(json_extract(b.raw_json, '$.contractual_assets[0]') AS REAL)    AS contractual_assets,
         CAST(json_extract(b.raw_json, '$.pre_payment[0]') AS REAL)           AS pre_payment,
         CAST(json_extract(b.raw_json, '$.bp_and_ap[0]') AS REAL)             AS bp_and_ap,
+        CAST(json_extract(b.raw_json, '$.pre_receivable[0]') AS REAL)         AS pre_receivable,
         CAST(json_extract(b.raw_json, '$.contract_liabilities[0]') AS REAL)  AS contract_liabilities,
         CAST(json_extract(b.raw_json, '$.st_loan[0]') AS REAL)               AS st_loan,
         CAST(json_extract(b.raw_json, '$.lt_loan[0]') AS REAL)               AS lt_loan,            -- 长期借款
@@ -172,7 +171,7 @@ financial_ratios AS (
         -- 3. 产业链话语权：上下游资金占用差额 (下游无息负债 - 上游无息资产)
         -- 差额若为正，说明企业靠“白嫖”上下游账期做大业务，具备强势护城河
         ROUND(
-            (COALESCE(bp_and_ap, 0) + COALESCE(contract_liabilities, 0)) -- 占下游的钱 (应付+预收)
+            (COALESCE(bp_and_ap, 0) + COALESCE(pre_receivable, 0) + COALESCE(contract_liabilities, 0)) -- 占下游的钱 (应付+预收)
             - 
             (COALESCE(ar_and_br, 0) + COALESCE(contractual_assets, 0) + COALESCE(pre_payment, 0)) -- 被上游占的钱 (应收+合同资产+预付)
         , 2) AS net_supply_chain_capital_occupied,

@@ -16,8 +16,7 @@ WITH base_data AS (
         CAST(json_extract(i.raw_json, '$.sales_fee[0]') AS REAL)       AS sales_fee,
         CAST(json_extract(i.raw_json, '$.manage_fee[0]') AS REAL)       AS manage_fee,
         CAST(json_extract(i.raw_json, '$.rad_cost[0]') AS REAL)       AS rad_cost,
-        CAST(json_extract(i.raw_json, '$.financial_expense[0]') AS REAL)    AS financial_expense,
-        CAST(json_extract(i.raw_json, '$.finance_cost_interest_fee[0]') AS REAL)    AS finance_cost_interest_fee,
+        CAST(json_extract(i.raw_json, '$.financing_expenses[0]') AS REAL)    AS finance_cost_interest_fee,
         CAST(json_extract(i.raw_json, '$.net_profit[0]') AS REAL)           AS net_profit,
         CAST(json_extract(i.raw_json, '$.net_profit[1]') AS REAL)           AS net_profit_yoy,
         CAST(json_extract(i.raw_json, '$.net_profit_atsopc[0]') AS REAL)    AS net_profit_atsopc,
@@ -47,7 +46,7 @@ WITH base_data AS (
         CAST(json_extract(c.raw_json, '$.goods_buy_and_service_cash_pay[0]') AS REAL)     AS cash_paid_for_goods,
         
         -- 新增：购建固定资产等支付的现金 (Capital Expenditure)
-        CAST(json_extract(c.raw_json, '$.cash_paid_for_assets[0]') AS REAL)          AS cash_paid_for_assets
+        CAST(json_extract(c.raw_json, '$.cash_paid_for_assets[0]') AS REAL)          AS cash_paid_for_assets,
 
         -- 新增：处置固定资产、无形资产和其他长期资产收回的现金净额 (Capital Expenditure)
         CAST(json_extract(c.raw_json, '$.net_cash_of_disposal_assets[0]') AS REAL) AS net_cash_of_disposal_assets
@@ -81,7 +80,7 @@ financial_ratios AS (
         END AS gross_margin,
 
         -- 核心利润
-        ROUND(revenue - operating_cost - operating_taxes_and_surcharge - sales_fee - manage_fee - rad_cost - financial_expense, 2) AS core_profit,
+        ROUND(revenue - operating_cost - operating_taxes_and_surcharge - sales_fee - manage_fee - rad_cost - finance_cost_interest_fee, 2) AS core_profit,
 
         -- 净利率
         CASE 

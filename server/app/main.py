@@ -1,5 +1,5 @@
 # -- filepath: server/app/main.py
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, HTTPException  # type: ignore[import]
 from fastapi.middleware.cors import CORSMiddleware
 
 from pathlib import Path

@@ -1,5 +1,5 @@
 # --filepath: server/tests/test_akshare.py
-import akshare as ak
+import akshare as ak  # type: ignore[import]
 import pandas as pd
 from typing import Optional
 

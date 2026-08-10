@@ -1,4 +1,6 @@
 # --filepath: server/app/core/config.py
+
+from os import path
 from pathlib import Path
 
 # 1. 统一获取项目根目录 (server/ 这一层)
@@ -17,6 +19,9 @@ class Settings:
     
     # 默认导出路径
     DEFAULT_EXPORT_DIR: Path = Path("D:/雪球数据/个股财务报表")
+
+    # stock_dict_a.npy 路径
+    STOCK_DICT_A_PATH: Path = Path("D:/DB/stock_dict_a.npy")
 
     # --- 也可以放其他全局配置 ---
     XUEQIU_REFERER: str = "https://xueqiu.com/"

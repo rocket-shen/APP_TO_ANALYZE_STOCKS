@@ -1,5 +1,21 @@
 # -- filepath: server/app/utils/tools.py
 
+from app.core.config import settings
+import numpy as np
+
+STOCK_DICT_A_PATH = settings.STOCK_DICT_A_PATH
+
+stock_dict = np.load(STOCK_DICT_A_PATH, allow_pickle=True).item() if STOCK_DICT_A_PATH.exists() else {}
+
+
+def get_stock_name(stock_code: str) -> str | None:
+    """根据股票代码返回名称，找不到返回 None"""
+    return stock_dict.get(stock_code)
+
+def search_by_name(keyword: str) -> dict:
+    """根据名称关键词模糊搜索，返回 {代码: 名称}"""
+    return {code: name for code, name in stock_dict.items() if keyword in name}
+
 def add_stock_prefix(stock_code):
     """
     根据股票代码添加市场前缀（SH 或 SZ）

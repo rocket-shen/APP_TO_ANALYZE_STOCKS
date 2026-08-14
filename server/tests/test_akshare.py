@@ -1,14 +1,15 @@
 # --filepath: server/tests/test_akshare.py
 import akshare as ak  # type: ignore[import]
 import pandas as pd
-from typing import Optional
+from typing import Union, List, Dict, Any
+import json
 
 def get_stock_history(
     symbol: str, 
     start_date: str = "20200101", 
     end_date: str = "20260525", 
     period: str = "daily", 
-    adjust: str = "qfq"
+    adjust: str = ""
 ) -> pd.DataFrame:
     """
     封装 AkShare 获取 A 股股票历史交易数据的函数
@@ -60,6 +61,44 @@ def get_stock_history(
         print(f"❌ 获取股票 {symbol} 历史数据失败: {e}")
         return pd.DataFrame() # 失败时返回空 DataFrame，防止调用方崩溃
 
+
+def save_to_json(data: Union[pd.DataFrame, List[Dict[str, Any]], str], filepath: str) -> bool:
+    """
+    将股票数据保存为本地 JSON 文件
+    
+    :param data: 可以是 Pandas DataFrame、字典列表或 JSON 字符串
+    :param filepath: 保存的 JSON 文件路径，如 'stock_data.json'
+    :return: 是否保存成功
+    """
+    if data is None or (isinstance(data, pd.DataFrame) and data.empty):
+        print("⚠️ 传入的数据为空，取消保存文件。")
+        return False
+
+    try:
+        # 情况 1: 如果传入的是 DataFrame
+        if isinstance(data, pd.DataFrame):
+            data.to_json(filepath, orient="records", date_format="iso", force_ascii=False, indent=4)
+        
+        # 情况 2: 如果传入的是字典/列表
+        elif isinstance(data, (dict, list)):
+            with open(filepath, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
+                
+        # 情况 3: 如果传入的是 JSON 字符串
+        elif isinstance(data, str):
+            with open(filepath, "w", encoding="utf-8") as f:
+                f.write(data)
+                
+        else:
+            raise TypeError(f"不支持的数据格式: {type(data)}")
+
+        print(f"✅ 成功将数据保存至 JSON 文件: {filepath}")
+        return True
+
+    except Exception as e:
+        print(f"❌ 保存 JSON 文件失败: {e}")
+        return False
+
 # ----------------------------------------------------
 # 🧪 测试运行
 # ----------------------------------------------------
@@ -67,9 +106,9 @@ if __name__ == "__main__":
     # 测试获取中国石化(600028)的前复权历史日线数据
     print("正在获取数据...")
     stock_df = get_stock_history(
-        symbol="600028", 
-        start_date="20250101", 
-        end_date="20260525",
+        symbol="600406", 
+        start_date="20141231", 
+        end_date="20260601",
         adjust="qfq"
     )
     

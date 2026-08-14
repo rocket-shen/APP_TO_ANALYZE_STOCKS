@@ -72,9 +72,24 @@ if __name__ == "__main__":
     import asyncio
 
     async def main():
-        symbol = input("请输入股票代码（如 SH600519）: ")
-        results = await fetch_xq_holders(symbol)
-        count = await update_share_holders(results)
-        print(f"✅ 成功更新/插入 [{symbol}] 的 {count} 条股东信息记录！")
+        while True:
+            symbol = input("请输入股票代码（如 SH600519，输入 q 退出）: ").strip()
 
-    asyncio.run(main())
+            if not symbol:
+                continue
+
+            if symbol.lower() in {"q", "quit", "exit"}:
+                print("👋 已退出程序。")
+                break
+
+            try:
+                results = await fetch_xq_holders(symbol)
+                count = await update_share_holders(results)
+                print(f"✅ 成功更新/插入 [{symbol}] 的 {count} 条股东信息记录！")
+            except Exception as e:
+                print(f"❌ 处理 [{symbol}] 失败：{e}")
+
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("👋 已退出程序。")

@@ -89,8 +89,27 @@ def update_shares_events(
 # ========================================
 if __name__ == "__main__":
     DB_PATH = "D:/DB/financial.db"
-    symbol = "002170"  # 替换为你想测试的股票代码
-    start_date = "20111231"
-    end_date = "20260601"
 
-    update_shares_events(symbol=symbol, start_date=start_date, end_date=end_date, db_path=DB_PATH)
+    start_date = "20141231"
+    end_date = "20260731"
+
+    while True:
+        symbol = input("请输入股票代码（如 600519，输入 q 退出）: ").strip()
+
+        # 如果没有输入内容，继续询问
+        if not symbol:
+            print("股票代码不能为空，请重新输入。")
+            continue
+
+        # 判断是否退出，支持 q、Q、quit、QUIT、quite、exit
+        if symbol.lower() in {"q", "quit", "quite", "exit"}:
+            print("👋 已退出程序。")
+            break
+
+        # 执行更新任务
+        update_shares_events(
+            symbol=symbol,
+            start_date=start_date,
+            end_date=end_date,
+            db_path=DB_PATH
+        )

@@ -20,9 +20,14 @@ class Settings:
     # 默认导出路径
     DEFAULT_EXPORT_DIR: Path = Path("D:/雪球数据/个股财务报表")
 
+    OUTPUT_JSON_DIR: Path = BASE_DIR / "data" / "output"
+
+    SQL_DIR: Path = BASE_DIR / "app" / "queries"
+
     # stock_dict_a.npy 路径
     STOCK_DICT_A_PATH: Path = Path("D:/DB/stock_dict_a.npy")
 
+    
     # --- 也可以放其他全局配置 ---
     XUEQIU_REFERER: str = "https://xueqiu.com/"
     TIMEOUT: float = 15.0

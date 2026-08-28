@@ -114,4 +114,4 @@ async def async_insert_to_db(df: pd.DataFrame):
 
 # ==================== 執行 ====================
 if __name__ == "__main__":
-    asyncio.run(import_yjbb_data("20260331"))
+    asyncio.run(import_yjbb_data("20260630"))

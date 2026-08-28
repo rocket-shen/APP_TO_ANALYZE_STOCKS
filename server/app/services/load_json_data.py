@@ -56,7 +56,7 @@ def execute_query(sql: str, symbol: str, db_path: Optional[str | Path] = None) -
         logger.info(f"🔍 执行查询，参数: {symbol}")
         
         # 使用 pandas 读取 SQL
-        df = pd.read_sql_query(sql, conn, params=(symbol,))
+        df = pd.read_sql_query(sql, conn, params=(symbol,symbol))
         
         if df.empty:
             logger.warning(f"⚠️ 查询无结果，参数: {symbol}")
@@ -79,7 +79,7 @@ def execute_query(sql: str, symbol: str, db_path: Optional[str | Path] = None) -
             conn.close()
 
 
-def save_json(json_data: str, template_name: str, symbol: str) -> Optional[str]:
+def save_json(json_data: str, symbol: str) -> Optional[str]:
     """
     保存JSON数据到文件
     
@@ -96,9 +96,7 @@ def save_json(json_data: str, template_name: str, symbol: str) -> Optional[str]:
         output_dir = Path(OUTPUT_JSON_DIR)
         output_dir.mkdir(parents=True, exist_ok=True)
         
-        # 生成文件名：模板名_股票代码_时间戳.json
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{template_name}_{symbol}_{timestamp}.json"
+        filename = f"{symbol}_share_holders.json"
         filepath = output_dir / filename
         
         # 保存文件
@@ -193,7 +191,7 @@ def interactive_query():
     while True:
         save_choice = input(f"\n💾 是否保存到文件? (y/n): ").strip().lower()
         if save_choice in ['y', 'yes', '是']:
-            filepath = save_json(json_data, template_name, symbol)
+            filepath = save_json(json_data, symbol)
             if filepath:
                 print(f"✅ 数据已保存到: {filepath}")
             else:

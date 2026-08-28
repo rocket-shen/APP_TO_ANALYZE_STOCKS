@@ -1,3 +1,5 @@
+#   file_path: server/app/crud/update_shares_events.py
+
 import os
 import sqlite3
 import akshare as ak
@@ -90,8 +92,8 @@ def update_shares_events(
 if __name__ == "__main__":
     DB_PATH = "D:/DB/financial.db"
 
-    start_date = "20141231"
-    end_date = "20260731"
+    start_date = "20191231"
+    end_date = "20260818"
 
     while True:
         symbol = input("请输入股票代码（如 600519，输入 q 退出）: ").strip()

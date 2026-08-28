@@ -62,7 +62,7 @@ async def update_share_holders(results: list[dict], db_path: str = str(settings.
         )
         """
     async with aiosqlite.connect(db_path) as db:
-        await db.executemany(sql,rows,)
+        await db.executemany(sql,rows)
         await db.commit()
 
     return len(rows)

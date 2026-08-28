@@ -4,7 +4,7 @@ import { Download } from 'lucide-react';
 import SearchBar from './components/dashboard/SearchBar';
 import DashboardHeader from './components/dashboard/DashboardHeader';
 import ReferLink from './components/dashboard/ReferLink';
-import BloombergChart from './components/charts/BloombgerCard';
+import BloombergChart from './components/charts/BloombergChart';
 import FinancialTable from './components/dashboard/FinancialTable';
 import SyncData from './components/dashboard/SyncData';
 

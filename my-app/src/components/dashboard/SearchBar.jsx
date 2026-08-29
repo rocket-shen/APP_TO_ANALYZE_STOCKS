@@ -20,10 +20,11 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
 
   const handleDownload = async () => {
     const targetSymbol = symbol || inputSymbol;
-    if (!targetSymbol || !onDownload) return;
-    
+    if (!targetSymbol || !onDownload || downloading) return;
     await onDownload(targetSymbol);
   };
+
+  const isBusy = loading || downloading;
 
 
   return (
@@ -37,11 +38,11 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
         value={inputSymbol}
         onChange={(e) => setInputSymbol(e.target.value.toUpperCase())}
         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        disabled={loading}
+        disabled={isBusy}
       />
       <button
         onClick={handleSearch}
-        disabled={loading}
+        disabled={isBusy}
         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:bg-blue-300"
       >
         {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Search className="w-4 h-4" />}
@@ -53,7 +54,7 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
             {/* 更新按鈕 */}
             <button
               onClick={handleSyncClick}
-              disabled={loading}
+              disabled={isBusy}
               title="同步最新財務數據"
               className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
             >
@@ -64,12 +65,16 @@ const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
             {/* 新增：下載 Excel 按鈕 */}
             <button
               onClick={handleDownload}
-              disabled={loading || !symbol}
+              disabled={isBusy || !symbol}
               title="下載 Excel 財務報表"
               className="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
             >
-              <Download className="w-4 h-4" />
-              <span className="hidden sm:inline">下載</span>
+              {downloading ? (
+                <Loader2 className="animate-spin w-4 h-4" />
+              ) : (
+                <Download className="w-4 h-4" />
+              )}
+              <span className="hidden sm:inline">{downloading ? '下載中' : '下載'}</span>
             </button>
           </>
         )}

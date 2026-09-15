@@ -93,7 +93,7 @@ if __name__ == "__main__":
     DB_PATH = "D:/DB/financial.db"
 
     start_date = "20191231"
-    end_date = "20260818"
+    end_date = "20260913"
 
     while True:
         symbol = input("请输入股票代码（如 600519，输入 q 退出）: ").strip()

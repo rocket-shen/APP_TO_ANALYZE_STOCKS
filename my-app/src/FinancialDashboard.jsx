@@ -45,6 +45,7 @@ const FinancialDashboard = () => {
         onDownload={handleDownload}
         symbol={symbol}
         loading={loading}
+        downloading={downloading}
         error={displayError}
       />
     </header>

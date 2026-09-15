@@ -2,7 +2,7 @@
 import React from 'react';
 import { Search, Loader2, RefreshCw, Download } from 'lucide-react';
 
-const SearchBar = ({onSearch, loading, error, onSync, symbol, onDownload }) => {
+const SearchBar = ({onSearch, loading, downloading = false, error, onSync, symbol, onDownload }) => {
   const [inputSymbol, setInputSymbol] = React.useState('');
 
   const handleSearch = () => {

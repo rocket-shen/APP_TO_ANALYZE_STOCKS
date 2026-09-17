@@ -1,5 +1,6 @@
 # -- filepath: server/app/services/fetchers.py
 import time
+import pandas as pd
 import httpx
 import logging
 from datetime import datetime
@@ -178,3 +179,31 @@ async def fetch_xq_holders(symbol: str) -> list[dict]:
         except Exception as e:
             logger.error(f"解析錯誤 {symbol} : {str(e)}")
             raise
+
+
+def fetch_share_change(
+    symbol: str,
+    start_date: str,
+    end_date: str,
+) -> pd.DataFrame:
+    """
+    从巨潮资讯抓股本变动（经 AkShare）。
+
+    :param symbol: 6 位代码，如 600519（不要 SH/SZ 前缀）
+    :param start_date: YYYYMMDD
+    :param end_date: YYYYMMDD
+    :return: 原始 DataFrame；没有数据时返回空表，不抛异常
+    """
+    import akshare as ak
+
+    code = symbol[-6:]
+    logger.info("抓取股本变动: %s %s~%s", code, start_date, end_date)
+
+    df = ak.stock_share_change_cninfo(
+        symbol=code,
+        start_date=start_date,
+        end_date=end_date,
+    )
+    if df is None:
+        return pd.DataFrame()
+    return df

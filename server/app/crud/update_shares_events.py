@@ -6,25 +6,10 @@ import akshare as ak
 import numpy as np
 import pandas as pd
 
-def update_shares_events(
-    symbol: str, start_date: str, end_date: str, db_path: str
-):
-    print(f":param {symbol}: 股票代码")
-    print(f":param {start_date}: 开始日期")
-    print(f":param {end_date}: 结束日期")
-    print(f":param {db_path}: SQLite 数据库文件的路径")
-    print(f"========================================")
-    print(f"🚀 开始处理股票: {symbol}")
-    print(f"========================================")
-
-    try:
-        df = ak.stock_share_change_cninfo(symbol=symbol, start_date=start_date, end_date=end_date)
-        if df is None or df.empty:
-            print(f"⚠️ 未获取到股票 {symbol} 的股本变动数据。")
-            return
-    except Exception as e:
-        print(f"❌ 从 akshare 获取数据失败: {e}")
-        return
+def update_shares_events(df: pd.DataFrame, db_path: str) -> int:
+    if df is None or df.empty:
+        print("⚠️ 没有股本变动数据，跳过写入")
+        return 0
 
     capital_share_mapping = {
         # 基础信息
@@ -74,9 +59,7 @@ def update_shares_events(
     try:
         cursor.executemany(sql, data_tuples)
         conn.commit()
-        print(
-            f"✅ 成功更新/插入 [{symbol}] 的 {cursor.rowcount} 条股本变动记录！"
-        )
+ 
     except sqlite3.Error as se:
         conn.rollback()
         print(f"❌ 数据库写入失败 (SQLite 错误): {se}")
@@ -86,32 +69,5 @@ def update_shares_events(
     finally:
         conn.close()
 
-# ========================================
-# 示例调用
-# ========================================
-if __name__ == "__main__":
-    DB_PATH = "D:/DB/financial.db"
+    return cursor.rowcount  # 返回受影响的行数
 
-    start_date = "20191231"
-    end_date = "20260913"
-
-    while True:
-        symbol = input("请输入股票代码（如 600519，输入 q 退出）: ").strip()
-
-        # 如果没有输入内容，继续询问
-        if not symbol:
-            print("股票代码不能为空，请重新输入。")
-            continue
-
-        # 判断是否退出，支持 q、Q、quit、QUIT、quite、exit
-        if symbol.lower() in {"q", "quit", "quite", "exit"}:
-            print("👋 已退出程序。")
-            break
-
-        # 执行更新任务
-        update_shares_events(
-            symbol=symbol,
-            start_date=start_date,
-            end_date=end_date,
-            db_path=DB_PATH
-        )

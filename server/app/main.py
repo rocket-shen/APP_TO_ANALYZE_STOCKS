@@ -1,6 +1,7 @@
 # -- filepath: server/app/main.py
 from fastapi import FastAPI, HTTPException  # type: ignore[import]
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.errors import install_error_handlers
 
 from pathlib import Path
 import httpx
@@ -73,6 +74,8 @@ async def lifespan(app: FastAPI):
 
     # 其他啟動邏輯（如載入 SQL 查詢等）可以放在這裡
     app.state.db_path = str(settings.DB_PATH)
+
+    logger.info("DB_PATH=%s", settings.DB_PATH)
     
     yield # ← 這裡是應用程式正常運行階段
     
@@ -87,15 +90,13 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
+install_error_handlers(app)
 # -------------------------
 # CORS
 # -------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "http://localhost:5173",
-    ],
+    allow_origins=settings.CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

@@ -5,7 +5,7 @@ import httpx
 import logging
 import json
 from datetime import datetime
-from app.utils.xq_cookies import XueqiuCookieManager
+from server.app.utils.xq_cookies_httpx import XueqiuCookieManager
 import pandas as pd
 from pandas import DataFrame
 from app.utils.tools import load_financial_config

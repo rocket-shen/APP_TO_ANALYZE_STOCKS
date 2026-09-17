@@ -3,10 +3,11 @@ import sqlite3
 import akshare as ak
 import numpy as np
 import pandas as pd
+from app.core.config import settings
 
 
 def update_dividend_events(
-    symbol: str, db_path: str, npy_path: str
+    symbol: str, db_path: str=str(settings.DB_PATH), npy_path: str=str(settings.STOCK_DICT_A_PATH)
 ):
     """抓取指定股票的分红派息详情并更新至 SQLite 数据库（结合本地字典补全代码和名称）
 
@@ -109,16 +110,4 @@ def update_dividend_events(
     finally:
         conn.close()
 
-
-# ========================================
-# 示例调用
-# ========================================
-if __name__ == "__main__":
-    DB_PATH = "D:/DB/financial.db"
-    # 请确保该路径与你的真实 npy 文件位置一致
-    FILE_PATH = "D:/DB/stock_dict_a.npy"
-    symbol = "000902"  # 替换为你想测试的股票代码
-
-    update_dividend_events(
-    symbol=symbol, db_path=DB_PATH, npy_path=FILE_PATH
-    )
+    return cursor.rowcount  # 返回受影响的行数

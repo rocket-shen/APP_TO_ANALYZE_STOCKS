@@ -1,7 +1,7 @@
 #  --filepath: server/tests/test_fetch_data.py
 import httpx
 import logging
-from app.utils.xq_cookies import XueqiuCookieManager
+from server.app.utils.xq_cookies_httpx import XueqiuCookieManager
 import akshare as ak
 import pandas as pd
 import asyncio

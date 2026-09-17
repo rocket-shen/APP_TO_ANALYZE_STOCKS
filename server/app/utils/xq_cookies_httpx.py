@@ -1,4 +1,4 @@
-#  -- filepath: server/app/utils/xq_cookies.py
+#  -- filepath: server/app/utils/xq_cookies_httpx.py
 import time
 import asyncio
 import logging

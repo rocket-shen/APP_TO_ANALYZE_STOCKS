@@ -6,6 +6,9 @@ from app.core.config import settings
 from app.services.data_sync import sync_stock_data
 from app.services.download_report import save_financial_reports_to_excel
 from app.utils.tools import add_stock_prefix
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(
     tags=["Financial_Data"]
@@ -30,9 +33,9 @@ async def get_financial_data(symbol: str, request: Request):
             # 前端通过 result.length === 0 来判断是否没找到数据
             return [dict(row) for row in rows]
                 
-    except sqlite3.Error as e:
-        # 错误处理可以保持异常抛出，FastAPI 会自动处理为 500
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+    except sqlite3.Error:
+        logger.exception("DB query failed for financial_data symbol=%s", symbol)
+        raise HTTPException(status_code=500, detail="Database error")
     
 @router.get("/financial_performance/{code}")
 async def get_financial_performance(code: str, request: Request):
@@ -55,10 +58,11 @@ async def get_financial_performance(code: str, request: Request):
 
             return [dict(row) for row in rows]
 
-    except sqlite3.Error as e:
+    except sqlite3.Error:
+        logger.exception("DB query failed for financial_performance code=%s", code)
         raise HTTPException(
             status_code=500,
-            detail=f"Database error: {str(e)}"
+            detail="Database error"
         )
     
 @router.post("/sync_financial_data/{symbol}")
@@ -73,10 +77,12 @@ async def sync_data(symbol: str, request: Request):
             return {"status": "ok", "message": f"Successfully synced {symbol}"}
         else:
             return {"status": "fail", "message": f"Sync {symbol} returned false"}
-    except Exception as e:
-        import traceback
-        traceback.print_exc() # 在终端打印完整报错信息
-        raise HTTPException(status_code=500, detail=str(e)) # 将错误原因返回给前端
+    except ValueError as e:
+        # add_stock_prefix 抛的，属于调用方输入问题
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception:
+        logger.exception("Sync failed for symbol=%s", symbol)
+        raise HTTPException(status_code=500, detail="Failed to sync data")
     
 @router.get("/quote_data/{symbol}")
 async def get_quote_data(symbol: str):
@@ -89,10 +95,9 @@ async def get_quote_data(symbol: str):
     try:
         quote = await fetch_xq_quote(symbol)
         return quote
-    except Exception as e:
-        import traceback
-        traceback.print_exc() # 在终端打印完整报错信息
-        raise HTTPException(status_code=500, detail=str(e)) # 将错误原因返回给前端
+    except Exception:
+        logger.exception("Quote fetch failed for symbol=%s", symbol)
+        raise HTTPException(status_code=500, detail="Failed to fetch quote")
     
 @router.get("/export-excel/{symbol}")
 async def export_financial_reports(
@@ -118,6 +123,7 @@ async def export_financial_reports(
             "file_name": Path(file_path).name
         }
         
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except Exception:
+        logger.exception("Excel export failed for symbol=%s", symbol)
+        raise HTTPException(status_code=500, detail="Failed to export excel")
     

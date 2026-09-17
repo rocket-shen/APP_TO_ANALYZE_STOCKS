@@ -3,18 +3,38 @@
 from app.core.config import settings
 import numpy as np
 
-STOCK_DICT_A_PATH = settings.STOCK_DICT_A_PATH
+_stock_dict: dict | None = None
 
-stock_dict = np.load(STOCK_DICT_A_PATH, allow_pickle=True).item() if STOCK_DICT_A_PATH.exists() else {}
+
+def _load_stock_dict() -> dict:
+    """第一次调用时才读 npy；之后复用内存里的副本。"""
+    global _stock_dict
+
+    stock_dict = _stock_dict
+    if stock_dict is None:
+        path = settings.STOCK_DICT_A_PATH
+        if path.exists():
+            stock_dict = np.load(path, allow_pickle=True).item()
+        else:
+            stock_dict = {}
+
+        _stock_dict = stock_dict
+
+    return stock_dict
 
 
 def get_stock_name(stock_code: str) -> str | None:
     """根据股票代码返回名称，找不到返回 None"""
-    return stock_dict.get(stock_code)
+    return _load_stock_dict().get(stock_code)
+
 
 def search_by_name(keyword: str) -> dict:
     """根据名称关键词模糊搜索，返回 {代码: 名称}"""
-    return {code: name for code, name in stock_dict.items() if keyword in name}
+    return {
+        code: name
+        for code, name in _load_stock_dict().items()
+        if keyword in name
+    }
 
 def add_stock_prefix(stock_code):
     """
@@ -53,8 +73,6 @@ import json
 from pathlib import Path
 
 def load_financial_config():
-    base_path = Path(__file__).resolve().parent.parent
-    config_path = base_path / "config" / "financial_fields.json"
-
+    config_path = Path(settings.FINANCIAL_FIELDS_JSON)
     with open(config_path, "r", encoding="utf-8") as f:
         return json.load(f)

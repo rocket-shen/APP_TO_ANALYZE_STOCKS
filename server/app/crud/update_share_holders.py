@@ -3,7 +3,6 @@
 import aiosqlite
 from datetime import datetime
 from app.core.config import settings
-from app.services.fetchers import fetch_xq_holders
 
 # 表字段列表（与建表顺序对应，方便批量插入）
 SHARE_HOLDERS_COLUMNS = [
@@ -67,29 +66,3 @@ async def update_share_holders(results: list[dict], db_path: str = str(settings.
 
     return len(rows)
 
-
-if __name__ == "__main__":
-    import asyncio
-
-    async def main():
-        while True:
-            symbol = input("请输入股票代码（如 SH600519，输入 q 退出）: ").strip()
-
-            if not symbol:
-                continue
-
-            if symbol.lower() in {"q", "quit", "exit"}:
-                print("👋 已退出程序。")
-                break
-
-            try:
-                results = await fetch_xq_holders(symbol)
-                count = await update_share_holders(results)
-                print(f"✅ 成功更新/插入 [{symbol}] 的 {count} 条股东信息记录！")
-            except Exception as e:
-                print(f"❌ 处理 [{symbol}] 失败：{e}")
-
-    try:
-        asyncio.run(main())
-    except KeyboardInterrupt:
-        print("👋 已退出程序。")

@@ -3,17 +3,17 @@ import json
 import aiosqlite
 import logging
 from app.core.config import settings
+import asyncio
 
 logger = logging.getLogger(__name__)
 
+_write_lock = asyncio.Lock()
+
 async def _generic_upsert(table_name: str, records: list[dict]):
-    
-    """通用 UPSERT 邏輯（移除 db_path 參數，改用 settings）"""
     if not records:
-        logger.warning(f"表 {table_name} 无记录需要更新")
+        logger.warning("表 %s 无记录需要更新", table_name)
         return
 
-    # 核心 SQL：根据 (symbol, report_date) 唯一索引进行覆盖更新
     sql = f"""
     INSERT INTO {table_name} (symbol, stock_name, report_date, raw_json)
     VALUES (?, ?, ?, ?)
@@ -22,24 +22,24 @@ async def _generic_upsert(table_name: str, records: list[dict]):
         raw_json = excluded.raw_json
     """
 
-    try:
-        async with aiosqlite.connect(str(settings.DB_PATH)) as db:
-            data_tuples = [
-                (
-                    r["symbol"],
-                    r.get("stock_name", "未知"), # 处理 NOT NULL 约束
-                    r["report_date"],
-                    json.dumps(r, ensure_ascii=False)
-                )
-                for r in records
-            ]
+    data_tuples = [
+        (
+            r["symbol"],
+            r.get("stock_name", "未知"),
+            r["report_date"],
+            json.dumps(r, ensure_ascii=False),
+        )
+        for r in records
+    ]
+
+    async with _write_lock:
+        async with aiosqlite.connect(str(settings.DB_PATH), timeout=30) as db:
+            await db.execute("PRAGMA journal_mode=WAL")
+            await db.execute("PRAGMA busy_timeout=30000")
             await db.executemany(sql, data_tuples)
             await db.commit()
-            logger.info(f"成功更新表 {table_name}: {len(records)} 条记录")
-            
-    except Exception as e:
-        logger.error(f"写入表 {table_name} 时发生错误: {str(e)}")
-        raise
+            logger.info("成功更新表 %s: %s 条记录", table_name, len(records))
+
 
 # --- 下面这三个函数必须把 db_path 传给 _generic_upsert ---
 

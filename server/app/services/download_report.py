@@ -1,11 +1,10 @@
 # --filepath: server/app/services/download_report.py
 import time
-from fastapi import Path
 import httpx
 import logging
 import json
 from datetime import datetime
-from server.app.utils.xq_cookies_httpx import XueqiuCookieManager
+from app.utils.xq_cookies_httpx import XueqiuCookieManager
 import pandas as pd
 from pandas import DataFrame
 from app.utils.tools import load_financial_config

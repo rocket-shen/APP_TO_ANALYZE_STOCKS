@@ -1,8 +1,14 @@
 # file: server/scripts/sync_share_data.py
 import asyncio
 from datetime import date
-
 from app.services.update_share_data import update_share_data
+import logging
+import traceback
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+)
 
 async def main():
     # 日期格式：YYYYMMDD，例如 20191231
@@ -28,7 +34,9 @@ async def main():
             await update_share_data(symbol, start_date, end_date)
             print(f"✅ {symbol} 更新完成\n")
         except Exception as e:
-            print(f"❌ {symbol} 更新失败: {e}\n")
+            print(f"❌ {symbol} 更新失败: {e}")
+            traceback.print_exc()
+            print()
 
 
 if __name__ == "__main__":

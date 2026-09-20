@@ -150,6 +150,9 @@ async def fetch_xq_holders(symbol: str) -> list[dict]:
             resp = await client.get(url, headers=headers, cookies=cookies, params=params)
             if resp.status_code != 200:
                 logger.warning(f"Response body: {resp.text[:400]}")
+            logger.info("[Holders] Status: %s for %s", resp.status_code, symbol)
+            logger.info("[Holders] Content-Type: %s", resp.headers.get("content-type"))
+            logger.info("[Holders] Body[:300]: %r", resp.text[:300])
             resp.raise_for_status()
             
             payload = resp.json().get("data", {})
@@ -199,11 +202,16 @@ def fetch_share_change(
     code = symbol[-6:]
     logger.info("抓取股本变动: %s %s~%s", code, start_date, end_date)
 
-    df = ak.stock_share_change_cninfo(
-        symbol=code,
-        start_date=start_date,
-        end_date=end_date,
-    )
+    try:
+        df = ak.stock_share_change_cninfo(
+            symbol=code,
+            start_date=start_date,
+            end_date=end_date,
+        )
+    except Exception:
+        logger.exception("巨潮股本变动接口失败: %s", code)
+        return pd.DataFrame()
+
     if df is None:
         return pd.DataFrame()
     return df

@@ -1,4 +1,5 @@
 import asyncio
+import logging
 from app.core.config import settings
 from app.services.fetchers import fetch_share_change
 from app.crud.update_share_holders import update_share_holders
@@ -7,6 +8,7 @@ from app.services.fetchers import fetch_xq_holders
 from app.utils.tools import add_stock_prefix
 from datetime import date
 
+logger = logging.getLogger(__name__)
 
 async def update_holder_data(symbol: str) -> None:
     """
@@ -18,6 +20,7 @@ async def update_holder_data(symbol: str) -> None:
     results = await fetch_xq_holders(prefix_symbol)
 
     if not results:
+        logger.warning("无雪球股东数据，跳过写入: %s", symbol)
         return
 
     await update_share_holders(
@@ -38,6 +41,7 @@ async def update_shares_event_data(
         end_date,
     )
     if df.empty:
+        logger.warning("无股本变动数据，跳过写入: %s", symbol)
         return
 
     await asyncio.to_thread(

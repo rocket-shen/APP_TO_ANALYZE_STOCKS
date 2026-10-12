@@ -15,13 +15,16 @@
 cd my-app
 npm install
 npm run dev
+```
 
-
+### 2. 後端（FastAPI）
 ```bash
 cd server
-
-# 安裝依賴
 pip install -r requirements.txt
+# 行情 / 同步需要瀏覽器：playwright install chromium
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+```
 
-# 啟動後端
-uvicorn main:app --reload --port 8000
+可選：複製 `server/.env.example` 為 `server/.env`。`CORS_ORIGINS` 須為 JSON 陣列（見範例）；不建 `.env` 亦可使用預設值。
+
+`GET /` 與 `/docs` 在空庫下也可通；財務 / 業績等 API 需 `server/data/financial.db` 已有 schema 與資料（或先跑 sync 灌數）。

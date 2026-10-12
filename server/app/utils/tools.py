@@ -36,6 +36,25 @@ def search_by_name(keyword: str) -> dict:
         if keyword in name
     }
 
+
+def strip_stock_prefix(stock_code):
+    """
+    去掉市场前缀，返回 6 位数字代码（DB 中 financial_performance.code 等字段用裸代码）。
+
+    参数:
+        stock_code (str): 6 位数字，或带 SH/SZ/BJ 前缀的代码
+
+    返回:
+        str: 裸 6 位代码，如 '600000'
+    """
+    code = str(stock_code).strip().upper()
+    if code.startswith(("SH", "SZ", "BJ")) and len(code) > 2:
+        code = code[2:]
+    if not code.isdigit() or len(code) != 6:
+        raise ValueError("股票代码应为6位数字，或带 SH/SZ/BJ 前缀")
+    return code
+
+
 def add_stock_prefix(stock_code):
     """
     根据股票代码添加市场前缀（SH 或 SZ）

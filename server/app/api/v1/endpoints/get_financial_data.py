@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.services.data_sync import sync_stock_data
 from app.services.download_report import save_financial_reports_to_excel
-from app.utils.tools import add_stock_prefix
+from app.utils.tools import add_stock_prefix, strip_stock_prefix
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +45,11 @@ async def get_financial_performance(code: str, request: Request):
             status_code=500,
             detail="SQL template 'get_financial_performance' not found"
         )
+
+    try:
+        code = strip_stock_prefix(code)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     try:
         with sqlite3.connect(str(settings.DB_PATH)) as conn:

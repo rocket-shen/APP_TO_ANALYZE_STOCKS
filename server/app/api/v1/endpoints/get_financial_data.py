@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 
 from app.core.config import settings
-from app.core.security import require_api_key
+from app.core.security import require_api_key, require_login
 from app.services.data_sync import sync_stock_data
 from app.services.download_report import save_financial_reports_to_excel
 from app.utils.tools import add_stock_prefix, dedupe_quarterly_rows, strip_stock_prefix
@@ -18,7 +18,7 @@ router = APIRouter(
     tags=["Financial_Data"]
 )
 
-@router.get("/financial_data/{symbol}")
+@router.get("/financial_data/{symbol}", dependencies=[Depends(require_login)])
 async def get_financial_data(symbol: str, request: Request):
     sql = request.app.state.queries.get("get_financial_data")
 
@@ -37,7 +37,7 @@ async def get_financial_data(symbol: str, request: Request):
         logger.exception("DB query failed for financial_data symbol=%s", symbol)
         raise HTTPException(status_code=500, detail="Database error")
 
-@router.get("/financial_performance/{code}")
+@router.get("/financial_performance/{code}", dependencies=[Depends(require_login)])
 async def get_financial_performance(code: str, request: Request):
     sql = request.app.state.queries.get("get_financial_performance")
 
@@ -66,7 +66,10 @@ async def get_financial_performance(code: str, request: Request):
             detail="Database error"
         )
 
-@router.post("/sync_financial_data/{symbol}", dependencies=[Depends(require_api_key)])
+@router.post(
+    "/sync_financial_data/{symbol}",
+    dependencies=[Depends(require_login), Depends(require_api_key)],
+)
 async def sync_data(symbol: str, request: Request):
     symbol = add_stock_prefix(symbol)
     try:
@@ -80,7 +83,7 @@ async def sync_data(symbol: str, request: Request):
         logger.exception("Sync failed for symbol=%s", symbol)
         raise HTTPException(status_code=500, detail="Failed to sync data")
 
-@router.get("/quote_data/{symbol}")
+@router.get("/quote_data/{symbol}", dependencies=[Depends(require_login)])
 async def get_quote_data(symbol: str):
     from app.services.fetchers import fetch_xq_quote
     symbol = add_stock_prefix(symbol)
@@ -92,7 +95,10 @@ async def get_quote_data(symbol: str):
         logger.exception("Quote fetch failed for symbol=%s", symbol)
         raise HTTPException(status_code=500, detail="Failed to fetch quote")
 
-@router.get("/export-excel/{symbol}", dependencies=[Depends(require_api_key)])
+@router.get(
+    "/export-excel/{symbol}",
+    dependencies=[Depends(require_login), Depends(require_api_key)],
+)
 async def export_financial_reports(
     symbol: str,
     use_db: bool = Query(True, description="是否從資料庫讀取")

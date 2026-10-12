@@ -1,5 +1,6 @@
 // my-app/src/hooks/useDownloadExcel.js
 import { useState } from 'react';
+import { downloadExcel } from '../services/api';
 
 const parseFilename = (disposition, fallback) => {
   if (!disposition) return fallback;
@@ -23,9 +24,7 @@ export const useDownloadExcel = () => {
 
     setDownloading(true);
     try {
-      const response = await fetch(`/api/v1/export-excel/${targetSymbol}`, {
-        method: 'GET',
-      });
+      const response = await downloadExcel(targetSymbol);
 
       const contentType = response.headers.get('content-type') || '';
 

@@ -1,6 +1,6 @@
 // filepath: my-app/src/hooks/useFinancialData.js
 import { useState } from 'react';
-import { fetchFinancialData } from '../services/api';
+import { fetchFinancialData, syncFinancialData } from '../services/api';
 
 const STANDARD_QUARTER_ENDS = new Set(['03-31', '06-30', '09-30', '12-31']);
 
@@ -82,9 +82,8 @@ export const useFinancialData = () => {
   };
 
   const syncFinancial = async (symbol) => {
-    const response = await fetch(`/api/v1/sync_financial_data/${symbol}`, { method: 'POST' });
-    const result = await response.json();
-    
+    const { response, result } = await syncFinancialData(symbol);
+
     if (response.ok) {
       await loadFinancial(symbol);
       return true;

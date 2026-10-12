@@ -32,9 +32,16 @@ class Settings(BaseSettings):
     XUEQIU_REFERER: str = "https://xueqiu.com/"
     TIMEOUT: float = 15.0
 
-    # 鉴权 / 限流
-    API_KEY: str = ""  # 空字符串 = 开发模式不校验
+    # API key / rate limit (sync & export; kept as secondary layer)
+    API_KEY: str = ""  # empty = skip key check only when ENV=dev
     RATE_LIMIT_PER_MINUTE: int = 20
+
+    # Single-user cookie login
+    AUTH_USERNAME: str = "admin"
+    AUTH_PASSWORD: str = ""  # empty + ENV=dev → login optional; set to enforce
+    AUTH_SECRET: str = ""  # required when AUTH_PASSWORD is set
+    AUTH_COOKIE_NAME: str = "stocks_session"
+    AUTH_COOKIE_MAX_AGE: int = 7 * 24 * 3600  # 7 days
 
     CORS_ORIGINS: List[str] = Field(
         default_factory=lambda: [
@@ -62,6 +69,15 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return [s.strip() for s in v.split(",") if s.strip()]
         return v
+
+    @property
+    def is_dev(self) -> bool:
+        return self.ENV.strip().lower() == "dev"
+
+    @property
+    def auth_enabled(self) -> bool:
+        """True when AUTH_PASSWORD is set (login required)."""
+        return bool((self.AUTH_PASSWORD or "").strip())
 
     def ensure_dirs(self) -> None:
         self.DB_PATH.parent.mkdir(parents=True, exist_ok=True)

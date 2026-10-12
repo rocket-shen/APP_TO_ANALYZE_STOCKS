@@ -10,7 +10,7 @@ from app.core.config import settings
 from app.core.security import require_api_key
 from app.services.data_sync import sync_stock_data
 from app.services.download_report import save_financial_reports_to_excel
-from app.utils.tools import add_stock_prefix, strip_stock_prefix
+from app.utils.tools import add_stock_prefix, dedupe_quarterly_rows, strip_stock_prefix
 
 logger = logging.getLogger(__name__)
 
@@ -30,8 +30,8 @@ async def get_financial_data(symbol: str, request: Request):
         with sqlite3.connect(str(settings.DB_PATH)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(sql, {"symbol": symbol})
-            rows = cursor.fetchall()
-            return [dict(row) for row in rows]
+            rows = [dict(row) for row in cursor.fetchall()]
+            return dedupe_quarterly_rows(rows)
 
     except sqlite3.Error:
         logger.exception("DB query failed for financial_data symbol=%s", symbol)

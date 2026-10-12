@@ -12,7 +12,8 @@ import logging
 from app.core.config import settings
 
 # 正確引入 router（根據你目前結構調整）
-from app.api.v1.endpoints.get_financial_data import router as financial_data_router  
+from app.api.v1.endpoints.get_financial_data import router as financial_data_router
+from app.api.v1.endpoints.auth import router as auth_router  
 from app.utils.xq_a_token import XueqiuCookieManager
 
 # 全域 logger
@@ -104,6 +105,7 @@ app.add_middleware(
 # -------------------------
 # Routers
 # -------------------------
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(financial_data_router, prefix="/api/v1")
 
 @app.get("/")

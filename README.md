@@ -28,3 +28,5 @@ uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 可選：複製 `server/.env.example` 為 `server/.env`。`CORS_ORIGINS` 須為 JSON 陣列（見範例）；不建 `.env` 亦可使用預設值。
 
 `GET /` 與 `/docs` 在空庫下也可通；財務 / 業績等 API 需 `server/data/financial.db` 已有 schema 與資料（或先跑 sync 灌數）。
+`POST /api/v1/sync_financial_data/{symbol}` 與 `GET /api/v1/export-excel/{symbol}` 受保護：`ENV=dev` 且 `API_KEY` 為空時可直接呼叫；否則需請求頭 `X-API-Key`。兩者皆受 `RATE_LIMIT_PER_MINUTE`（依 IP / Key）限制，超限回 429。
+

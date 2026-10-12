@@ -3,10 +3,11 @@ import logging
 import sqlite3
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import FileResponse
 
 from app.core.config import settings
+from app.core.security import require_api_key
 from app.services.data_sync import sync_stock_data
 from app.services.download_report import save_financial_reports_to_excel
 from app.utils.tools import add_stock_prefix, strip_stock_prefix
@@ -65,7 +66,7 @@ async def get_financial_performance(code: str, request: Request):
             detail="Database error"
         )
 
-@router.post("/sync_financial_data/{symbol}")
+@router.post("/sync_financial_data/{symbol}", dependencies=[Depends(require_api_key)])
 async def sync_data(symbol: str, request: Request):
     symbol = add_stock_prefix(symbol)
     try:
@@ -91,7 +92,7 @@ async def get_quote_data(symbol: str):
         logger.exception("Quote fetch failed for symbol=%s", symbol)
         raise HTTPException(status_code=500, detail="Failed to fetch quote")
 
-@router.get("/export-excel/{symbol}")
+@router.get("/export-excel/{symbol}", dependencies=[Depends(require_api_key)])
 async def export_financial_reports(
     symbol: str,
     use_db: bool = Query(True, description="是否從資料庫讀取")

@@ -95,3 +95,79 @@ def load_financial_config():
     config_path = Path(settings.FINANCIAL_FIELDS_JSON)
     with open(config_path, "r", encoding="utf-8") as f:
         return json.load(f)
+
+from datetime import date, datetime
+
+_STANDARD_QUARTER_ENDS = frozenset({(3, 31), (6, 30), (9, 30), (12, 31)})
+
+
+def _parse_report_date(value) -> date | None:
+    """Parse report_date into a date; returns None if unusable."""
+    if value is None:
+        return None
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    text = str(value).strip()
+    if not text:
+        return None
+    text = text[:10]
+    try:
+        return date.fromisoformat(text)
+    except ValueError:
+        return None
+
+
+def _year_quarter(d: date) -> tuple[int, int]:
+    return d.year, (d.month - 1) // 3 + 1
+
+
+def dedupe_quarterly_rows(rows: list[dict], date_key: str = "report_date") -> list[dict]:
+    """Keep one row per calendar year-quarter.
+
+    Groups by year + quarter derived from ``report_date`` month.
+    Prefers standard quarter-end dates (03-31 / 06-30 / 09-30 / 12-31);
+    otherwise keeps the row with the latest ``report_date``.
+    Preserves first-seen quarter order. Rows without a parseable date
+    are kept at the end in original order.
+    """
+    if not rows:
+        return []
+
+    best: dict[tuple[int, int], dict] = {}
+    best_date: dict[tuple[int, int], date] = {}
+    best_is_standard: dict[tuple[int, int], bool] = {}
+    order: list[tuple[int, int]] = []
+    undated: list[dict] = []
+
+    for row in rows:
+        d = _parse_report_date(row.get(date_key) if isinstance(row, dict) else None)
+        if d is None:
+            undated.append(row)
+            continue
+
+        key = _year_quarter(d)
+        is_standard = (d.month, d.day) in _STANDARD_QUARTER_ENDS
+
+        if key not in best:
+            best[key] = row
+            best_date[key] = d
+            best_is_standard[key] = is_standard
+            order.append(key)
+            continue
+
+        prev_standard = best_is_standard[key]
+        prev_d = best_date[key]
+        replace = False
+        if is_standard and not prev_standard:
+            replace = True
+        elif is_standard == prev_standard and d > prev_d:
+            replace = True
+
+        if replace:
+            best[key] = row
+            best_date[key] = d
+            best_is_standard[key] = is_standard
+
+    return [best[k] for k in order] + undated

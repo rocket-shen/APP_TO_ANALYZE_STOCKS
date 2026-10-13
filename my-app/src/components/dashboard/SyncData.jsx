@@ -1,27 +1,28 @@
 // filepath: my-app/src/components/dashboard/SyncData.jsx
 
 import React from 'react';
-import { Download } from 'lucide-react';  
+import { Download, Loader2 } from 'lucide-react';
 
 const SyncData = ({ onSync, loading, symbol }) => {
-    return (
-        <div className="glass-panel max-w-md mx-auto mt-12 p-8 text-center border border-white/10 backdrop-blur-2xl bg-black/60 shadow-xl shadow-cyan-900/30 rounded-3xl">
-          <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-linear-to-br from-cyan-500/20 to-orange-500/20 flex items-center justify-center border border-cyan-400/30">
-            <Download className="w-8 h-8 text-cyan-400" />
-          </div>
-          <h3 className="text-2xl font-semibold mb-3 text-white">未發現本地數據</h3>
-          <p className="text-slate-400 mb-8">
-            資料庫中暫無 <span className="font-mono text-cyan-400 font-bold">{symbol}</span> 的歷史財報
-          </p>
-          <button
-            onClick={onSync}
-            disabled={loading}
-            className="w-full py-4 bg-linear-to-r from-cyan-500 to-cyan-600 hover:from-cyan-400 hover:to-cyan-500 disabled:from-slate-700 disabled:to-slate-700 text-white font-medium rounded-2xl shadow-lg shadow-cyan-500/50 transition-all active:scale-[0.985]"
-          >
-            {loading ? "正在從雲端同步..." : "立即同步抓取數據"}
-          </button>
-        </div>
-    );
+  return (
+    <div className="glass-panel mx-auto mt-4 max-w-md rounded-2xl p-8 text-center">
+      <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-400/25 bg-cyan-400/10">
+        <Download className="h-7 w-7 text-cyan-300" />
+      </div>
+      <h3 className="mb-2 text-xl font-semibold text-white">未發現本地數據</h3>
+      <p className="mb-6 text-sm leading-relaxed text-slate-400">
+        資料庫中暫無 <span className="num font-semibold text-cyan-300">{symbol}</span> 的歷史財報
+      </p>
+      <button
+        onClick={onSync}
+        disabled={loading}
+        className="btn btn-primary w-full py-3"
+      >
+        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+        {loading ? "正在從雲端同步..." : "立即同步抓取數據"}
+      </button>
+    </div>
+  );
 };
 
 export default SyncData;

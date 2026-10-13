@@ -59,54 +59,80 @@ const DashboardHeader = ({ quote }) => {
     return null;
   };
 
+  const current = quote?.current;
+  const percent = quote?.percent;
+  const chg = quote?.chg;
+  const priceColor = getColorClass('current', current) || 'text-slate-100';
+  const changeColor = getColorClass('percent', percent) || 'text-slate-300';
 
   return (
-    <div className="mb-6 border-b border-slate-200 pb-4">
-      
-      {/* 标题区域 */}
-      <div className="flex items-center justify-between">
-
-        <div className="flex items-center gap-3">
-          <div className="bg-blue-600 text-white px-3 py-1 rounded text-sm font-bold">
-            股票报价
-          </div>
-
-          <h2 className="text-2xl font-bold text-slate-300">
-            {quote?.name || '未知股票'}
-          </h2>
-        </div>
-
-        <div className="text-sm text-slate-500">
-          更新时间：
-          {now.toLocaleTimeString('zh-CN', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-          })}
-          {' '}
-          {now.toLocaleDateString('zh-CN', {
-            weekday: 'long'
-          })}
-        </div>
-
-      </div>
-      {/* 数据网格区域 */}
-      <div className="exchange-data-container mt-6">
-        <div className="exchange-data-grid grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 text-sm">
-          {entries.map(({ field, label, value }) => (
-            <div key={field} className="flex flex-col">
-              {/* 标签 */}
-              <span className="text-slate-500 mb-1">
-                {label}
+    <div>
+      <div className="flex flex-col gap-4 border-b border-cyan-400/10 pb-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <span className="rounded-md border border-cyan-400/25 bg-cyan-400/10 px-2.5 py-1 text-xs font-semibold tracking-wide text-cyan-300">
+              股票报价
+            </span>
+            {quote?.symbol || quote?.code ? (
+              <span className="num rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-400">
+                {quote?.symbol || quote?.code}
               </span>
-              
-              {/* 数值 */}
-              <span className={`font-semibold ${getColorClass(field, value) || 'text-slate-300'}`}>
-                {formatValue(value, field)}
+            ) : null}
+          </div>
+          <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+            <h2 className="truncate text-2xl font-semibold tracking-tight text-slate-50 sm:text-3xl">
+              {quote?.name || '未知股票'}
+            </h2>
+            <div className="flex flex-wrap items-baseline gap-2">
+              <span className={`num text-3xl font-bold tracking-tight sm:text-4xl ${priceColor}`}>
+                {formatValue(current, 'current')}
+              </span>
+              <span className={`num text-sm font-semibold ${changeColor}`}>
+                {formatValue(chg, 'chg')}
+              </span>
+              <span className={`num rounded-md px-2 py-0.5 text-sm font-semibold ${
+                parseFloat(percent) > 0
+                  ? 'bg-red-500/15 text-red-400'
+                  : parseFloat(percent) < 0
+                    ? 'bg-green-500/15 text-green-400'
+                    : 'bg-white/5 text-slate-300'
+              }`}>
+                {formatValue(percent, 'percent')}
               </span>
             </div>
-          ))}
+          </div>
         </div>
+
+        <div className="text-xs text-slate-500 sm:text-right">
+          <div>更新时间</div>
+          <div className="mt-0.5 text-slate-400">
+            {now.toLocaleTimeString('zh-CN', {
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: false
+            })}
+            {' · '}
+            {now.toLocaleDateString('zh-CN', {
+              weekday: 'long'
+            })}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+        {entries.map(({ field, label, value }) => (
+          <div
+            key={field}
+            className="rounded-xl border border-white/5 bg-white/[0.025] px-3 py-2.5 transition-colors hover:border-cyan-400/20 hover:bg-white/[0.04]"
+          >
+            <span className="mb-1 block text-[11px] tracking-wide text-slate-500">
+              {label}
+            </span>
+            <span className={`num block text-sm font-semibold ${getColorClass(field, value) || 'text-slate-200'}`}>
+              {formatValue(value, field)}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

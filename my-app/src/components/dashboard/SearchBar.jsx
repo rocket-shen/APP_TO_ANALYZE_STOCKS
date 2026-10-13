@@ -28,60 +28,65 @@ const SearchBar = ({onSearch, loading, downloading = false, error, onSync, symbo
 
 
   return (
-    <div className="max-w-4xl mx-auto mb-6 text-center">
-    <h1 className="text-xl font-extrabold mb-3 text-red-500 tracking-wide">A股上市公司財務數據儀表板</h1>
-    <div className="flex gap-2 max-w-md mx-auto">
-      <input
-        type="text"
-        placeholder="输入股票代码 (如: SH600519)"
-        className="flex-1 px-3 py-2.5 rounded-lg border border-slate-200/60 bg-white/80 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all placeholder:text-slate-400 text-slate-800"
-        value={inputSymbol}
-        onChange={(e) => setInputSymbol(e.target.value.toUpperCase())}
-        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-        disabled={isBusy}
-      />
-      <button
-        onClick={handleSearch}
-        disabled={isBusy}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-lg flex items-center gap-2 transition-all shadow-md disabled:bg-blue-300"
-      >
-        {loading ? <Loader2 className="animate-spin w-4 h-4" /> : <Search className="w-4 h-4" />}
-        查询
-      </button>
+    <div className="w-full">
+      <h1 className="mb-2 text-sm font-semibold tracking-wide text-slate-100 sm:text-base">
+        <span className="mr-2 inline-block h-2 w-2 rounded-full bg-rose-500 align-middle shadow-[0_0_10px_rgba(244,63,94,0.8)]" />
+        A股上市公司財務數據儀表板
+      </h1>
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="text"
+          placeholder="输入股票代码 (如: SH600519)"
+          className="field min-w-[12rem] flex-1"
+          value={inputSymbol}
+          onChange={(e) => setInputSymbol(e.target.value.toUpperCase())}
+          onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+          disabled={isBusy}
+        />
+        <button
+          onClick={handleSearch}
+          disabled={isBusy}
+          className="btn btn-primary"
+        >
+          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          查询
+        </button>
 
-      {symbol && (
-          <>
-            {/* 更新按鈕 */}
-            <button
-              onClick={handleSyncClick}
-              disabled={isBusy}
-              title="同步最新財務數據"
-              className="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">更新</span>
-            </button>
+        {symbol && (
+            <>
+              <button
+                onClick={handleSyncClick}
+                disabled={isBusy}
+                title="同步最新財務數據"
+                className="btn btn-amber"
+              >
+                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                <span className="hidden sm:inline">更新</span>
+              </button>
 
-            {/* 新增：下載 Excel 按鈕 */}
-            <button
-              onClick={handleDownload}
-              disabled={isBusy || !symbol}
-              title="下載 Excel 財務報表"
-              className="bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white px-3 py-2 rounded-lg flex items-center gap-2 transition-all shadow-md"
-            >
-              {downloading ? (
-                <Loader2 className="animate-spin w-4 h-4" />
-              ) : (
-                <Download className="w-4 h-4" />
-              )}
-              <span className="hidden sm:inline">{downloading ? '下載中' : '下載'}</span>
-            </button>
-          </>
-        )}
+              <button
+                onClick={handleDownload}
+                disabled={isBusy || !symbol}
+                title="下載 Excel 財務報表"
+                className="btn btn-emerald"
+              >
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                <span className="hidden sm:inline">{downloading ? '下載中' : '下載'}</span>
+              </button>
+            </>
+          )}
+      </div>
+      {error && (
+        <p className="mt-2 inline-flex rounded-lg border border-rose-400/30 bg-rose-500/10 px-2.5 py-1 text-sm text-rose-300">
+          {error}
+        </p>
+      )}
     </div>
-    {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
-  </div>
-);
+  );
 };
 
 export default SearchBar;

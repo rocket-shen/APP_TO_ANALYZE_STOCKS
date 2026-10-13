@@ -32,6 +32,7 @@ WITH base_data AS (
         CAST(json_extract(b.raw_json, '$.total_current_assets[0]') AS REAL)  AS total_current_assets,
         CAST(json_extract(b.raw_json, '$.total_current_liab[0]') AS REAL)    AS total_current_liab,
         CAST(json_extract(b.raw_json, '$.currency_funds[0]') AS REAL)        AS currency_funds,
+        CAST(json_extract(b.raw_json, '$.tradable_fnncl_assets[0]') AS REAL) AS tradable_fnncl_assets,
         CAST(json_extract(b.raw_json, '$.inventory[0]') AS REAL)             AS inventory,
         CAST(json_extract(b.raw_json, '$.ar_and_br[0]') AS REAL)             AS ar_and_br,
         CAST(json_extract(b.raw_json, '$.contractual_assets[0]') AS REAL)    AS contractual_assets,
@@ -71,7 +72,7 @@ lag_data AS (
     FROM base_data
 ),
 
-financial_ratios AS (
+financial_indicators AS (
     -- ③ 核心指标、修正指标与新增维度计算
     SELECT
         symbol,
@@ -84,12 +85,19 @@ financial_ratios AS (
         revenue_yoy,
         net_profit,
         net_profit_yoy,
-        net_profit_atsopc, 
+        net_profit_atsopc,
+        profit_total_amt,
         inventory, 
         ar_and_br,
         total_assets,
         total_liab,
+        total_current_assets,
+        total_current_liab,
+        currency_funds,
+        tradable_fnncl_assets,
         net_cash_flow_operating,
+        asset_impairment_loss,
+        credit_impairment_loss,
 
         -- 🌟 [资产重轻结构透视明细]
         COALESCE(fixed_asset_sum, 0)       AS fixed_asset_sum,       -- 固定资产
@@ -129,16 +137,28 @@ financial_ratios AS (
         -- 核心利润
         ROUND(revenue - operating_cost - operating_taxes_and_surcharge - sales_fee - manage_fee - rad_cost - COALESCE(financing_expenses, 0), 2) AS core_profit,
 
-        -- [精确修正：完善版自由现金流（经营现金流 - 资本支出 + 资产处置回收金额）]
-        ROUND(net_cash_flow_operating - COALESCE(cash_paid_for_assets, 0) + COALESCE(net_cash_of_disposal_assets, 0), 2) AS free_cash_flow,
+        -- [严格口径自由现金流：经营现金流 - 资本支出]
+        ROUND(net_cash_flow_operating - COALESCE(cash_paid_for_assets, 0), 2) AS free_cash_flow,
 
         -- [现金流质量]
         CASE WHEN revenue > 0 THEN ROUND(cash_from_sales / revenue, 4) END AS cash_received_ratio,
         CASE WHEN operating_cost > 0 THEN ROUND(cash_paid_for_goods / operating_cost, 4) END AS cash_paid_ratio,
 
+        -- [盈利质量：净现比]
+        CASE
+            WHEN net_profit IS NOT NULL AND net_profit != 0
+            THEN ROUND(net_cash_flow_operating / net_profit, 4)
+        END AS cash_earnings_ratio,
+
         -- [偿债能力（流动与速动）]
         CASE WHEN total_current_liab > 0 THEN ROUND(total_current_assets / total_current_liab, 2) END AS current_ratio,
         CASE WHEN total_current_liab > 0 THEN ROUND((total_current_assets - COALESCE(inventory, 0)) / total_current_liab, 2) END AS quick_ratio,
+
+        -- [现金比率：货币资金 + 交易性金融资产] / 流动负债
+        CASE
+            WHEN total_current_liab > 0
+            THEN ROUND((COALESCE(currency_funds, 0) + COALESCE(tradable_fnncl_assets, 0)) / total_current_liab, 2)
+        END AS cash_ratio,
 
         -- [精确修正：应收账款周转率（使用平均应收账款）]
         CASE 
@@ -152,15 +172,27 @@ financial_ratios AS (
             WHEN inventory > 0 THEN ROUND(operating_cost / inventory, 2)
         END AS inventory_turnover,
 
+        -- [报告期天数：按季报/半年报/三季报/年报映射，非一律 365]
+        CASE
+            WHEN substr(report_date, 6, 5) = '03-31' THEN 90
+            WHEN substr(report_date, 6, 5) = '06-30' THEN 181
+            WHEN substr(report_date, 6, 5) = '09-30' THEN 273
+            WHEN substr(report_date, 6, 5) = '12-31' THEN 365
+            ELSE 90
+        END AS period_days,
+
         ----------------------------------------------------
         -- 🔥以下为新增的核心风险与安全垫分析维度🔥
         ----------------------------------------------------
 
-        -- 1. 资产质量：减值风险占比 (体现利润是否有被“财务洗澡”或计提操纵的隐患)
-        CASE 
-            WHEN revenue > 0 
-            THEN ROUND((COALESCE(asset_impairment_loss, 0) + COALESCE(credit_impairment_loss, 0)) / revenue * 100, 2)
-        END AS impairment_to_revenue_ratio,
+        -- 1. 资产质量：减值损失占利润总额比重
+        CASE
+            WHEN profit_total_amt IS NOT NULL AND profit_total_amt != 0
+            THEN ROUND(
+                (COALESCE(asset_impairment_loss, 0) + COALESCE(credit_impairment_loss, 0))
+                / profit_total_amt * 100
+            , 2)
+        END AS impairment_to_profit_ratio,
 
         -- 2. 短期防爆雷：现金短期债务比 (硬通货对短期有息负债的覆盖程度)
         CASE 
@@ -185,4 +217,23 @@ financial_ratios AS (
     FROM lag_data
 )
 
-SELECT * FROM financial_ratios;
+-- 周转天数依赖同层别名 ar_turnover / inventory_turnover，故在外层派生
+SELECT
+    fi.*,
+    CASE
+        WHEN ar_turnover IS NOT NULL AND ar_turnover > 0
+        THEN ROUND(period_days * 1.0 / ar_turnover, 2)
+    END AS ar_turnover_days,
+    CASE
+        WHEN inventory_turnover IS NOT NULL AND inventory_turnover > 0
+        THEN ROUND(period_days * 1.0 / inventory_turnover, 2)
+    END AS inventory_turnover_days,
+    CASE
+        WHEN (ar_turnover IS NOT NULL AND ar_turnover > 0)
+             AND (inventory_turnover IS NOT NULL AND inventory_turnover > 0)
+        THEN ROUND(
+            (period_days * 1.0 / ar_turnover)
+            + (period_days * 1.0 / inventory_turnover)
+        , 2)
+    END AS operating_cycle
+FROM financial_indicators fi;

@@ -25,28 +25,32 @@ const LoginPage = ({ onSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0f1c] text-slate-200 flex items-center justify-center px-4">
-      <div className="w-full max-w-sm rounded-2xl border border-cyan-500/20 bg-black/50 backdrop-blur-md p-8 shadow-2xl shadow-[0_0_40px_rgba(0,255,255,0.06)]">
-        <div className="flex items-center gap-3 mb-6">
-          <div className="bg-blue-600 text-white p-2 rounded-lg">
-            <Lock className="w-5 h-5" />
+    <div className="app-shell relative flex min-h-screen items-center justify-center px-4 py-10 text-slate-200">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-cyan-400/10 blur-3xl" />
+      </div>
+      <div className="glass-panel relative w-full max-w-sm rounded-2xl p-8">
+        <div className="mb-7 flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
+            <Lock className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-100">登录</h1>
+            <p className="text-[11px] font-medium tracking-[0.18em] text-cyan-300/80">A股终端</p>
+            <h1 className="text-xl font-semibold text-slate-50">登录</h1>
             <p className="text-sm text-slate-400">请先登录后再查询、更新或下载</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm text-slate-400 mb-1" htmlFor="username">
+            <label className="mb-1.5 block text-xs font-medium tracking-wide text-slate-400" htmlFor="username">
               用户名
             </label>
             <input
               id="username"
               type="text"
               autoComplete="username"
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-600 bg-slate-900/80 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="field"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               disabled={loading}
@@ -55,14 +59,14 @@ const LoginPage = ({ onSuccess }) => {
           </div>
 
           <div>
-            <label className="block text-sm text-slate-400 mb-1" htmlFor="password">
+            <label className="mb-1.5 block text-xs font-medium tracking-wide text-slate-400" htmlFor="password">
               密码
             </label>
             <input
               id="password"
               type="password"
               autoComplete="current-password"
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-600 bg-slate-900/80 text-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="field"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={loading}
@@ -70,14 +74,18 @@ const LoginPage = ({ onSuccess }) => {
             />
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && (
+            <p className="rounded-lg border border-rose-400/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-300">
+              {error}
+            </p>
+          )}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white py-2.5 rounded-lg flex items-center justify-center gap-2 font-medium transition-all"
+            className="btn btn-primary mt-1 w-full py-2.5"
           >
-            {loading ? <Loader2 className="animate-spin w-4 h-4" /> : null}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             {loading ? '登录中…' : '登录'}
           </button>
         </form>

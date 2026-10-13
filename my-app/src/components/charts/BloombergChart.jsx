@@ -85,27 +85,35 @@ export default function BloombergChart({data}) {
   const stockName = data?.[0]?.stock_name;
 
   const toBillion = (val) => (val / 1e8).toFixed(1);
+  if (!data || data.length === 0) {
+    return (
+      <div className="glass-panel rounded-2xl px-6 py-12 text-center text-slate-500">
+        暂无图表数据
+      </div>
+    );
+  }
+
   return (
-    <div className="glass-panel mt-8 mb-8 p-6 rounded-2xl border border-white/10 backdrop-blur-xl font-mono bg-slate-900 shadow-2xl shadow-cyan-500/10 w-full min-h-[800px]">
+    <div className="glass-panel mb-4 w-full rounded-2xl p-4 font-mono sm:p-6">
       
       {/* 顶栏控制台风格 Header */}
-      <div style={{ borderBottom: `2px solid ${BB_COLORS.blue}`, paddingBottom: '10px', marginBottom: '25px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+      <div className="mb-5 flex flex-col gap-2 border-b border-cyan-400/20 pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 style={{ fontSize: '20px', margin: '0', fontWeight: 'bold', letterSpacing: '1px' }}>
+          <h1 className="m-0 text-base font-bold tracking-wide text-slate-100 sm:text-lg">
             <span style={{ color: BB_COLORS.blue }}>BBG_ANALYTICS:</span> INDUSTRIAL FINANCIAL MONITOR · {stockName}
           </h1>
-          <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: BB_COLORS.text }}>VIEW SOURCE: view_financial_data_industrial</p>
+          <p className="mt-1 text-xs" style={{ color: BB_COLORS.text }}>VIEW SOURCE: view_financial_data_industrial</p>
         </div>
-        <div style={{ fontSize: '12px', color: BB_COLORS.amber, textAlign: 'right' }}>
+        <div className="text-xs sm:text-right" style={{ color: BB_COLORS.amber }}>
           <span>TERMINAL MODE // SECURE_DATA_CONNECTED</span>
         </div>
       </div>
 
       {/* 四宫格看盘核心布局 */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(550px, 1fr))', gap: '20px' }}>
+      <div className="chart-grid">
         
         {/* 1: 盈利质量与造血背离分析 (关键：看净利润与自由现金流是否同步) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             1. EARNINGS & CASH DIVERGENCE (营收、利润与自由现金流)
           </h2>
@@ -126,7 +134,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 2: 净利润VS自由现金流 */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             NET_PROFIT & CASH DIVERGENCE (净利润与自由现金流)
           </h2>
@@ -155,7 +163,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 3: 自由现金流 (FCF) 绝对值变动 */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             FCF CASH-FLOW & DEBT CONVERGENCE ANALYSIS
           </h2>
@@ -246,7 +254,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 4: 风险防御垫与减值分析 (关键：看现金能否覆盖短债，减值是否吞噬营收) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
             4. CREDIT RISK & IMPAIRMENT MONITOR (暴雷防线与资产减值)
           </h2>
@@ -271,7 +279,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 5: 供应链资本占用分析 (关键：零轴线之上的正数代表免费白嫖上下游资金) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.green}`, paddingLeft: '8px' }}>
             5. SUPPLY CHAIN MOAT (正负零轴：净占用上下游资金差额)
           </h2>
@@ -307,7 +315,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 6-1: 库存周转效率 (双Y轴：折线=周转率，柱状=库存) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
             6-1. INVENTORY TURNOVER (库存周转率 & 库存金额)
           </h2>
@@ -332,7 +340,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 6-2: 应收账款周转效率 (双Y轴：折线=周转率，柱状=应收账款) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
             6-2. ACCOUNTS RECEIVABLE TURNOVER (应收周转率 & 应收账款)
           </h2>
@@ -357,7 +365,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 7. 三大核心利润率走势 (ROE、毛利率、净利率走势图) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
             5. PROFITABILITY MARGIN TRENDS (净资产收益率、毛利率、净利率 %)
           </h2>
@@ -381,7 +389,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 8. 核心利润 与 净利润 对比图 (柱线混排，看非经常损益或利息的剥离) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.green}`, paddingLeft: '8px' }}>
             8. CORE PROFIT VS NET PROFIT (核心主营利润与最终净利润对比)
           </h2>
@@ -403,7 +411,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 9. 资产状况：固定资产、无形资产与总资产 (专业堆叠图) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.cyan}`, paddingLeft: '8px' }}>
             9. ASSET COMPOSITION ANALYSIS (总资产重轻资产分布结构)
           </h2>
@@ -426,7 +434,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 10. 负债状况：有息负债与总负债 (透视核心债务风险) */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
             10. DEBT RISK PROFILE (有息负债占总负债比重与违约隐患)
           </h2>
@@ -448,7 +456,7 @@ export default function BloombergChart({data}) {
         </div>
 
         {/* 11: 利息保障倍数（EBITDA / 利息费用），衡量盈利对利息的覆盖能力，越高越安全 */}
-        <div style={{ backgroundColor: BB_COLORS.cardBg, padding: '15px', border: '1px solid #1F2633' }}>
+        <div className="bb-card">
           <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
             11. 利息保障倍数（EBITDA / 利息费用）, (衡量盈利对利息的覆盖能力)
           </h2>
@@ -472,7 +480,7 @@ export default function BloombergChart({data}) {
       </div>
 
       {/* 底部免责与彭博控制台命令行提示 */}
-      <div style={{ marginTop: '25px', padding: '10px', borderTop: `1px solid ${BB_COLORS.grid}`, fontSize: '11px', color: '#556677', display: 'flex', justifyContent: 'space-between' }}>
+      <div className="mt-5 flex flex-col gap-1 border-t border-white/5 pt-3 text-[11px] text-slate-500 sm:flex-row sm:justify-between">
         <span>BBG-ANALYST-ID: 998273 // INDUSTRIAL_VIEW_MODEL_V2</span>
         <span>GO TO FINANCIAL ANALYSIS RUN [ENTER]</span>
       </div>

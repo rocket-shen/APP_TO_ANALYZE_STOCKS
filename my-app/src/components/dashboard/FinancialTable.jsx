@@ -40,7 +40,7 @@ const FinancialTable = ({ data = [] }) => {
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-8 text-slate-500">
+      <div className="glass-panel rounded-2xl px-6 py-10 text-center text-slate-500">
         暂无财务报表数据
       </div>
     );
@@ -57,144 +57,139 @@ const FinancialTable = ({ data = [] }) => {
 
   // 增长率格式化及颜色渲染
   const renderRate = (val) => {
-    if (val === null || val === undefined) return <span className="text-slate-400">-</span>;
+    if (val === null || val === undefined) return <span className="text-slate-500">-</span>;
     const isPositive = val > 0;
     return (
-      <span className={`font-mono ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
+      <span className={`num font-mono ${isPositive ? 'text-emerald-400' : 'text-rose-400'}`}>
         {isPositive ? `+${val.toFixed(2)}%` : `${val.toFixed(2)}%`}
       </span>
     );
   };
 
   return (
-    <div className="mt-4 w-full glass-panel border border-white/10 backdrop-blur-xl bg-black/40 rounded-2xl shadow-2xl overflow-hidden">
-      {/* 头部信息区 */}
-      <div className="px-3 py-2 border-b border-white/5 bg-white/2 flex justify-between items-center gap-4">
-        <div className="flex-shrink-0">
-          <h3 className="text-lg font-semibold text-white">
-            {data[0]?.stock_name} ({data[0]?.code})
+    <div className="glass-panel w-full overflow-hidden rounded-2xl">
+      <div className="flex flex-col gap-4 border-b border-white/5 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="min-w-0">
+          <h3 className="truncate text-lg font-semibold text-white">
+            {data[0]?.stock_name} <span className="num text-slate-400">({data[0]?.code})</span>
           </h3>
-          <p className="text-xs text-slate-400 mt-1">
-            行业分类：<span className="text-cyan-400">{data[0]?.industry}</span>
+          <p className="mt-1 text-xs text-slate-400">
+            行业分类：<span className="text-cyan-300">{data[0]?.industry}</span>
           </p>
         </div>
-        {/* 季度切換按鈕 */}
-        <div className="flex gap-1 bg-slate-900/50 p-1 rounded-xl border border-white/10">
-          {[
-            { label: '一季報', value: 'Q1' },
-            { label: '二季報', value: 'Q2' },
-            { label: '三季報', value: 'Q3' },
-            { label: '四季報', value: 'Q4' },
-          ].map(({ label, value }) => (
-            <button
-              key={value}
-              onClick={() => setActiveQuarter(value)}
-              className={`px-4 py-1.5 text-xs font-medium rounded-lg transition-all ${
-                activeQuarter === value
-                  ? 'bg-cyan-500 text-black shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <span className="text-xs px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 font-mono">
-          历史财报 (共 {data.length} 期)
-        </span>
-      </div>
-      
-      <div className="mt-2 text-xs text-slate-400 flex items-center gap-2">
-          當前顯示：
-          <span className="text-cyan-400 font-medium">
-            {activeQuarter === 'Q1' && '第一季度報告'}
-            {activeQuarter === 'Q2' && '第二季度報告'}
-            {activeQuarter === 'Q3' && '第三季度報告'}
-            {activeQuarter === 'Q4' && '第四季度報告（年報）'}
-          </span>
-          <span className="text-slate-500">（共 {filteredData.length} 期）</span>
-        </div>
 
-      {/* 表格滚动容器 */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex gap-1 rounded-xl border border-white/10 bg-slate-950/50 p-1">
+            {[
+              { label: '一季報', value: 'Q1' },
+              { label: '二季報', value: 'Q2' },
+              { label: '三季報', value: 'Q3' },
+              { label: '四季報', value: 'Q4' },
+            ].map(({ label, value }) => (
+              <button
+                key={value}
+                onClick={() => setActiveQuarter(value)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  activeQuarter === value
+                    ? 'bg-cyan-400 text-slate-950 shadow-md shadow-cyan-500/20'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+          <span className="num rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs text-cyan-300">
+            历史财报 (共 {data.length} 期)
+          </span>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 border-b border-white/5 px-4 py-2.5 text-xs text-slate-400 sm:px-5">
+        當前顯示：
+        <span className="font-medium text-cyan-300">
+          {activeQuarter === 'Q1' && '第一季度報告'}
+          {activeQuarter === 'Q2' && '第二季度報告'}
+          {activeQuarter === 'Q3' && '第三季度報告'}
+          {activeQuarter === 'Q4' && '第四季度報告（年報）'}
+        </span>
+        <span className="text-slate-500">（共 {filteredData.length} 期）</span>
+      </div>
+
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="w-full border-collapse text-left">
           <thead>
-            <tr className="bg-slate-900/50 border-b border-white/5 text-slate-400 text-xs font-medium uppercase tracking-wider">
-              <th className="p-3 whitespace-nowrap">{FIELD_LABELS.report_date}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.revenue}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.revenue_yoy}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.revenue_qoq}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.net_profit}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.net_profit_yoy}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.net_profit_qoq}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.eps}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.nav_per_share}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.roe}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.ocf_per_share}</th>
-              <th className="p-3 text-right whitespace-nowrap">{FIELD_LABELS.gross_margin}</th>
-              <th className="p-3 whitespace-nowrap">{FIELD_LABELS.announce_date}</th>
+            <tr className="border-b border-white/5 bg-slate-950/40 text-xs font-medium tracking-wider text-slate-400">
+              <th className="whitespace-nowrap p-3">{FIELD_LABELS.report_date}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.revenue}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.revenue_yoy}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.revenue_qoq}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.net_profit}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.net_profit_yoy}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.net_profit_qoq}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.eps}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.nav_per_share}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.roe}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.ocf_per_share}</th>
+              <th className="whitespace-nowrap p-3 text-right">{FIELD_LABELS.gross_margin}</th>
+              <th className="whitespace-nowrap p-3">{FIELD_LABELS.announce_date}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/3 text-sm">
-            {filteredData.map((item, index) => (
-              <tr 
-                key={item.report_date + index} 
-                className="hover:bg-white/2 transition-colors group"
-              >
-                {/* 报告期 */}
-                <td className="p-4 font-mono font-medium text-slate-200 whitespace-nowrap">
-                  {item.report_date}
-                </td>
-                {/* 营业总收入 */}
-                <td className="p-4 text-right font-mono text-slate-300">
-                  {formatNumber(item.revenue)}
-                </td>
-                {/* 营收同比 */}
-                <td className="p-4 text-right">
-                  {renderRate(item.revenue_yoy)}
-                </td>
-                {/* 营收环比 */}
-                <td className="p-4 text-right">
-                  {renderRate(item.revenue_qoq)}
-                </td>
-                {/* 净利润 */}
-                <td className="p-4 text-right font-mono text-slate-300">
-                  {formatNumber(item.net_profit)}
-                </td>
-                {/* 净利同比 */}
-                <td className="p-4 text-right">
-                  {renderRate(item.net_profit_yoy)}
-                </td>
-                {/* 净利环比 */}
-                <td className="p-4 text-right">
-                  {renderRate(item.net_profit_qoq)}
-                </td>
-                {/* 每股收益 */}
-                <td className="p-4 text-right font-mono text-slate-300">
-                  {item.eps?.toFixed(2) || '-'}
-                </td>
-                {/* 每股净资产 */}
-                <td className="p-4 text-right font-mono text-slate-400">
-                  {item.nav_per_share?.toFixed(2) || '-'}
-                </td>
-                {/* ROE */}
-                <td className="p-4 text-right font-mono text-cyan-400">
-                  {item.roe ? `${item.roe.toFixed(2)}%` : '-'}
-                </td>
-                {/* 每股经营现金流 */}
-                <td className="p-4 text-right font-mono text-slate-400">
-                  {item.ocf_per_share?.toFixed(2) || '-'}
-                </td>
-                {/* 销售毛利率 */}
-                <td className="p-4 text-right font-mono text-slate-300">
-                  {item.gross_margin ? `${item.gross_margin.toFixed(2)}%` : '-'}
-                </td>
-                {/* 公告日期 */}
-                <td className="p-4 font-mono text-slate-500 text-xs whitespace-nowrap">
-                  {item.announce_date}
+          <tbody className="divide-y divide-white/5 text-sm">
+            {filteredData.length === 0 ? (
+              <tr>
+                <td colSpan={13} className="px-4 py-10 text-center text-slate-500">
+                  该季度暂无数据
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredData.map((item, index) => (
+                <tr
+                  key={item.report_date + index}
+                  className="transition-colors hover:bg-cyan-400/[0.04]"
+                >
+                  <td className="num whitespace-nowrap p-3 font-mono font-medium text-slate-200">
+                    {item.report_date}
+                  </td>
+                  <td className="num p-3 text-right font-mono text-slate-300">
+                    {formatNumber(item.revenue)}
+                  </td>
+                  <td className="p-3 text-right">
+                    {renderRate(item.revenue_yoy)}
+                  </td>
+                  <td className="p-3 text-right">
+                    {renderRate(item.revenue_qoq)}
+                  </td>
+                  <td className="num p-3 text-right font-mono text-slate-300">
+                    {formatNumber(item.net_profit)}
+                  </td>
+                  <td className="p-3 text-right">
+                    {renderRate(item.net_profit_yoy)}
+                  </td>
+                  <td className="p-3 text-right">
+                    {renderRate(item.net_profit_qoq)}
+                  </td>
+                  <td className="num p-3 text-right font-mono text-slate-300">
+                    {item.eps?.toFixed(2) || '-'}
+                  </td>
+                  <td className="num p-3 text-right font-mono text-slate-400">
+                    {item.nav_per_share?.toFixed(2) || '-'}
+                  </td>
+                  <td className="num p-3 text-right font-mono text-cyan-300">
+                    {item.roe ? `${item.roe.toFixed(2)}%` : '-'}
+                  </td>
+                  <td className="num p-3 text-right font-mono text-slate-400">
+                    {item.ocf_per_share?.toFixed(2) || '-'}
+                  </td>
+                  <td className="num p-3 text-right font-mono text-slate-300">
+                    {item.gross_margin ? `${item.gross_margin.toFixed(2)}%` : '-'}
+                  </td>
+                  <td className="num whitespace-nowrap p-3 font-mono text-xs text-slate-500">
+                    {item.announce_date}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

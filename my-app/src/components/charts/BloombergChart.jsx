@@ -1,14 +1,12 @@
-// --filepath my-app/src/components/charts/BloombgerCard.jsx
+// --filepath my-app/src/components/charts/BloombergChart.jsx
 import React, { useState } from 'react';
 import {
   ResponsiveContainer,
   ComposedChart,
   LineChart,
   BarChart,
-  AreaChart,
   Line,
   Bar,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -21,21 +19,28 @@ import {
 // 彭博终端风格 调色板 (Bloomberg Palette)
 // ==========================================
 const BB_COLORS = {
-  bg: '#0B0E14',         // 终端深色背景
-  cardBg: '#12161F',     // 看板卡片背景
-  grid: '#222A36',       // 网格线
-  text: '#A3B1C2',       // 辅助文字
-  textMain: '#FFFFFF',   // 主文字
-  blue: '#0055FF',       // 彭博标准蓝 (主营收入/正资产)
-  amber: '#FF9900',      // 终端琥珀金 (利润率/核心指标)
-  green: '#00C261',      // 现金流/安全垫 (正向)
-  red: '#FF3344',        // 减值/负债 (风险)
-  purple: '#9933FF',     // 运营效率
-  cyan: '#00B5E2',       // 补充色
-  asset2: '#0A7FB3',     // 资产堆叠色1
-  asset3: '#6C5CE7',     // 资产堆叠色2
-  liab2: '#FF6B6B'       // 有息负债强调色
+  bg: '#0B0E14',
+  cardBg: '#12161F',
+  grid: '#222A36',
+  text: '#A3B1C2',
+  textMain: '#FFFFFF',
+  blue: '#0055FF',
+  amber: '#FF9900',
+  green: '#00C261',
+  red: '#FF3344',
+  purple: '#9933FF',
+  cyan: '#00B5E2',
+  asset2: '#0A7FB3',
+  asset3: '#6C5CE7',
+  liab2: '#FF6B6B'
 };
+
+const TABS = [
+  { id: 'earnings', label: '盈利质量', en: 'EARNINGS QUALITY' },
+  { id: 'cashflow', label: '现金流与造血', en: 'CASH FLOW' },
+  { id: 'ops', label: '营运效率', en: 'OPS EFFICIENCY' },
+  { id: 'solvency', label: '偿债与风险', en: 'SOLVENCY & RISK' }
+];
 
 // ==========================================
 // 彭博风格自定义 Tooltip
@@ -80,11 +85,49 @@ const formatXAxis = (tickItem) => {
   return `${tickItem.substring(2, 4)}/${tickItem.substring(5, 7)}`;
 };
 
-export default function BloombergChart({data}) {
+const CardTitle = ({ color, children }) => (
+  <h2 style={{
+    fontSize: '14px',
+    margin: '0 0 15px 0',
+    color: BB_COLORS.text,
+    borderLeft: `3px solid ${color}`,
+    paddingLeft: '8px'
+  }}>
+    {children}
+  </h2>
+);
 
+const PosNegBarShape = (props) => {
+  const { x, y, width, height, value, payload } = props;
+  const isPositive = value >= 0;
+  let fill = isPositive ? BB_COLORS.green : BB_COLORS.red;
+  const dateStr = payload?.report_date?.toString() || '';
+  const isYearEnd = dateStr.includes('-12-31') ||
+    dateStr.endsWith('/12') ||
+    dateStr.includes('/12/');
+  if (isYearEnd) {
+    fill = '#d4e7f0';
+  }
+  const rectY = isPositive ? y : y + height;
+  const rectHeight = Math.abs(height);
+  return (
+    <rect
+      x={x}
+      y={rectY}
+      width={width}
+      height={rectHeight}
+      fill={fill}
+      opacity={0.85}
+      rx={2}
+    />
+  );
+};
+
+export default function BloombergChart({ data }) {
+  const [activeTab, setActiveTab] = useState('earnings');
   const stockName = data?.[0]?.stock_name;
-
   const toBillion = (val) => (val / 1e8).toFixed(1);
+
   if (!data || data.length === 0) {
     return (
       <div className="glass-panel rounded-2xl px-6 py-12 text-center text-slate-500">
@@ -93,396 +136,295 @@ export default function BloombergChart({data}) {
     );
   }
 
+  const renderEarnings = () => (
+    <>
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.amber}>
+          净现比 CASH_EARNINGS_RATIO (经营现金流 / 净利润)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={1} stroke={BB_COLORS.amber} strokeDasharray="4 4" strokeWidth={1} opacity={0.7} label={{ value: '1.0', fill: BB_COLORS.amber, fontSize: 10 }} />
+              <Line type="monotone" dataKey="cash_earnings_ratio" name="净现比" stroke={BB_COLORS.amber} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.cyan}>
+          销售净利率 NET_PROFIT_MARGIN (%)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Line type="monotone" dataKey="net_profit_margin" name="销售净利率(%)" stroke={BB_COLORS.cyan} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.red}>
+          减值损失占利润比重 IMPAIRMENT_TO_PROFIT (%)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.red} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={0} stroke="#FFFFFF" strokeWidth={1} opacity={0.35} />
+              <Line type="monotone" dataKey="impairment_to_profit_ratio" name="减值/利润总额(%)" stroke={BB_COLORS.red} strokeWidth={2} dot={{ r: 3, fill: BB_COLORS.red }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderCashflow = () => (
+    <>
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.green}>
+          收现比 CASH_RECEIVED_RATIO (销售收现 / 营业收入)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={1} stroke={BB_COLORS.green} strokeDasharray="4 4" strokeWidth={1} opacity={0.7} label={{ value: '1.0', fill: BB_COLORS.green, fontSize: 10 }} />
+              <Line type="monotone" dataKey="cash_received_ratio" name="收现比" stroke={BB_COLORS.green} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.purple}>
+          付现比 CASH_PAID_RATIO (采购付现 / 营业成本)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={1} stroke={BB_COLORS.purple} strokeDasharray="4 4" strokeWidth={1} opacity={0.7} label={{ value: '1.0', fill: BB_COLORS.purple, fontSize: 10 }} />
+              <Line type="monotone" dataKey="cash_paid_ratio" name="付现比" stroke={BB_COLORS.purple} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.amber}>
+          自由现金流 FREE_CASH_FLOW (OCF − CapEx)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <BarChart data={data} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={0} stroke="#FFFFFF" strokeWidth={1} opacity={0.4} />
+              <Bar
+                dataKey="free_cash_flow"
+                name="自由现金流"
+                maxBarSize={45}
+                shape={PosNegBarShape}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderOps = () => (
+    <>
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.blue}>
+          应收账款 AR_TURNOVER (左:周转天数 / 右:周转率)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <ComposedChart data={data} margin={{ top: 10, right: -10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}天`} />
+              <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.amber} tick={{ fontSize: 11 }} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Line yAxisId="left" type="monotone" dataKey="ar_turnover_days" name="应收周转天数" stroke={BB_COLORS.blue} strokeWidth={2} dot={{ r: 3 }} />
+              <Line yAxisId="right" type="monotone" dataKey="ar_turnover" name="应收周转率(次)" stroke={BB_COLORS.amber} strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.purple}>
+          存货 INVENTORY_TURNOVER (左:周转天数 / 右:周转率)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <ComposedChart data={data} margin={{ top: 10, right: -10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis yAxisId="left" stroke={BB_COLORS.purple} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}天`} />
+              <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.amber} tick={{ fontSize: 11 }} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Line yAxisId="left" type="monotone" dataKey="inventory_turnover_days" name="存货周转天数" stroke={BB_COLORS.purple} strokeWidth={2} dot={{ r: 3 }} />
+              <Line yAxisId="right" type="monotone" dataKey="inventory_turnover" name="存货周转率(次)" stroke={BB_COLORS.amber} strokeWidth={2} strokeDasharray="4 4" dot={{ r: 3 }} />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.cyan}>
+          营业周期 OPERATING_CYCLE (应收天数 + 存货天数)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}天`} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Line type="monotone" dataKey="operating_cycle" name="营业周期(天)" stroke={BB_COLORS.cyan} strokeWidth={2.5} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </>
+  );
+
+  const renderSolvency = () => (
+    <>
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.blue}>
+          流动 / 速动比率 CURRENT & QUICK RATIO
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={2} stroke={BB_COLORS.blue} strokeDasharray="4 4" strokeWidth={1} opacity={0.55} label={{ value: '流动2.0', fill: BB_COLORS.blue, fontSize: 10 }} />
+              <ReferenceLine y={1} stroke={BB_COLORS.green} strokeDasharray="4 4" strokeWidth={1} opacity={0.55} label={{ value: '速动1.0', fill: BB_COLORS.green, fontSize: 10 }} />
+              <Line type="monotone" dataKey="current_ratio" name="流动比率" stroke={BB_COLORS.blue} strokeWidth={2} dot={{ r: 3 }} />
+              <Line type="monotone" dataKey="quick_ratio" name="速动比率" stroke={BB_COLORS.green} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.amber}>
+          资产负债率 ASSET_LIAB_RATIO (%)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <Line type="monotone" dataKey="asset_liab_ratio" name="资产负债率(%)" stroke={BB_COLORS.amber} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
+        <CardTitle color={BB_COLORS.cyan}>
+          现金比率 CASH_RATIO ((货币资金+交易性金融资产)/流动负债)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={0.2} stroke={BB_COLORS.cyan} strokeDasharray="4 4" strokeWidth={1} opacity={0.6} label={{ value: '0.2', fill: BB_COLORS.cyan, fontSize: 10 }} />
+              <Line type="monotone" dataKey="cash_ratio" name="现金比率" stroke={BB_COLORS.cyan} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </>
+  );
+
+  const tabContent = {
+    earnings: renderEarnings,
+    cashflow: renderCashflow,
+    ops: renderOps,
+    solvency: renderSolvency
+  };
+
   return (
     <div className="glass-panel mb-4 w-full rounded-2xl p-4 font-mono sm:p-6">
-      
-      {/* 顶栏控制台风格 Header */}
       <div className="mb-5 flex flex-col gap-2 border-b border-cyan-400/20 pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="m-0 text-base font-bold tracking-wide text-slate-100 sm:text-lg">
             <span style={{ color: BB_COLORS.blue }}>BBG_ANALYTICS:</span> INDUSTRIAL FINANCIAL MONITOR · {stockName}
           </h1>
-          <p className="mt-1 text-xs" style={{ color: BB_COLORS.text }}>VIEW SOURCE: view_financial_data_industrial</p>
+          <p className="mt-1 text-xs" style={{ color: BB_COLORS.text }}>VIEW SOURCE: view_financial_data_industrial · 四大维度</p>
         </div>
         <div className="text-xs sm:text-right" style={{ color: BB_COLORS.amber }}>
           <span>TERMINAL MODE // SECURE_DATA_CONNECTED</span>
         </div>
       </div>
 
-      {/* 四宫格看盘核心布局 */}
-      <div className="chart-grid">
-        
-        {/* 1: 盈利质量与造血背离分析 (关键：看净利润与自由现金流是否同步) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
-            1. EARNINGS & CASH DIVERGENCE (营收、利润与自由现金流)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: -30, left: -10, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis yAxisId="left" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`} />
-                <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                <Bar yAxisId="left" dataKey="revenue" name="营业收入" fill={BB_COLORS.blue} opacity={0.7} maxBarSize={40} />
-                <Line yAxisId="right" type="monotone" dataKey="gross_margin" name="毛利率(%)" stroke={BB_COLORS.purple} strokeWidth={1.5} dot={false} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 2: 净利润VS自由现金流 */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
-            NET_PROFIT & CASH DIVERGENCE (净利润与自由现金流)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <AreaChart data={data} margin={{ top: 10, right: 0, left: -10, bottom: 0 }}>
-                <defs>
-                  {/* 经营现金流的渐变填充：健康色 */}
-                  <linearGradient id="colorCash" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0} />
-                  </linearGradient>
-                  {/* 净利润的预警逻辑：如果净利润高于现金流，这里可以设置特殊的滤镜或颜色 */}
-                  {/* 提示：高级预警通常结合 ComposeChart 使用，这里我们通过线条颜色区分 */}
-                </defs>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`} />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                <Area type="monotone" dataKey="net_cash_flow_operating" name="经营现金流" stroke="#2dd4bf" fill="url(#colorCash)" strokeWidth={2} fillOpacity={1} />
-                <Area type="monotone" dataKey="net_profit" name="净利润" stroke={BB_COLORS.purple} strokeWidth={1.5} fill="transparent" dot={{ r: 1.5, fill: '#818cf8', strokeWidth: 1, fillOpacity: 1 }} activeDot={{ r: 3, strokeWidth: 0 }} />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 3: 自由现金流 (FCF) 绝对值变动 */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
-            FCF CASH-FLOW & DEBT CONVERGENCE ANALYSIS
-          </h2>
-          {/* 图表主区域 */}
-          <div style={{ width: '100%', height: 320 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: -30, left: -10, bottom: 0 }}>
-                {/* 严谨的极暗网格线 */}
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11, fontFamily: 'monospace' }} tickFormatter={formatXAxis}/>
-                <YAxis 
-                  yAxisId="left" 
-                  stroke={BB_COLORS.text} 
-                  tick={{ fontSize: 11, fontFamily: 'monospace' }}
-                  tickFormatter={(val) => `${toBillion(val)}亿`}
-                />
-                <YAxis 
-                  yAxisId="right" 
-                  orientation="right" 
-                  stroke={BB_COLORS.blue} 
-                  tick={{ fontSize: 11, fontFamily: 'monospace' }}
-                  tickFormatter={(val) => `${toBillion(val)}亿`}
-                />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                {/* 1. 零轴参考线：如果FCF跌入地下（为负值），提供最显眼的水平基准 */}
-                <ReferenceLine y={0} yAxisId="left" stroke="#FFFFFF" strokeWidth={1} opacity={0.4} />
-                {/* 2. 自由现金流 (FCF) 绝对值变动：采用动态染色柱状图 */}
-                <Bar 
-                  yAxisId="left"
-                  dataKey="free_cash_flow" 
-                  name="自由现金流" 
-                  maxBarSize={45}
-                  shape={(props) => {
-                    const { x, y, width, height, value, payload } = props;
-                    
-                    const isPositive = value >= 0;
-                    let fill = isPositive ? BB_COLORS.green : BB_COLORS.red;
-                    const dateStr = payload?.report_date?.toString() || '';
-                    const isYearEnd = dateStr.includes('-12-31') || 
-                                      dateStr.endsWith('/12') || 
-                                      dateStr.includes('/12/');
-                    if (isYearEnd) {
-                      fill = '#d4e7f0';     // ← 这里改成你想要的特定颜色（目前是亮橙色）
-                    }
-                    const rectY = isPositive ? y : y + height;
-                    const rectHeight = Math.abs(height);
-
-                    return (
-                      <rect 
-                        x={x} 
-                        y={rectY} 
-                        width={width} 
-                        height={rectHeight} 
-                        fill={fill} 
-                        opacity={0.85}
-                        rx={2} // 可选：加一点圆角更好看
-                      />
-                    );
-                  }}
-                />
-                {/* 3. 折线图A (左轴)：最终净利润，高亮穿梭看“剪刀差” */}
-                <Line 
-                  yAxisId="left" 
-                  type="linear" 
-                  dataKey="net_profit_atsopc" 
-                  name="归母净利润" 
-                  stroke={BB_COLORS.blue} 
-                  strokeWidth={2.5} 
-                  dot={{ r: 3, fill: BB_COLORS.blue }}
-                  activeDot={{ r: 5 }}
-                />
-                {/* 4. 折线图B (右轴)：有息负债总额，挂在高空透视风险对冲 */}
-                <Line 
-                  yAxisId="right" 
-                  type="linear" 
-                  dataKey="interest_bearing_liab" 
-                  name="有息负债" 
-                  stroke={BB_COLORS.amber} 
-                  strokeWidth={2} 
-                  strokeDasharray="4 4"
-                  dot={{ r: 3, fill: BB_COLORS.amber }}
-                  activeDot={{ r: 5 }}
-                />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 4: 风险防御垫与减值分析 (关键：看现金能否覆盖短债，减值是否吞噬营收) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
-            4. CREDIT RISK & IMPAIRMENT MONITOR (暴雷防线与资产减值)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 0, left: 0, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} />
-                <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.red} tick={{ fontSize: 11 }} />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                {/* 现金短债比采用面积图，低于1.0属于危险区域 */}
-                <Area yAxisId="left" type="monotone" dataKey="cash_to_st_debt_ratio" name="现金短期债务比" fill={BB_COLORS.blue} stroke={BB_COLORS.blue} fillOpacity={0.15} />
-                {/* 减值占比采用红线陡峭度表现 */}
-                <Line yAxisId="right" type="monotone" dataKey="impairment_to_revenue_ratio" name="减值损失/营收比(%)" stroke={BB_COLORS.red} strokeWidth={0.5} dot={{ r: 2 }} />
-                {/* 安全警戒线：现金短债比=1.0 */}
-                <ReferenceLine y={1} yAxisId="left" stroke={BB_COLORS.blue} strokeWidth={1} opacity={0.4} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 5: 供应链资本占用分析 (关键：零轴线之上的正数代表免费白嫖上下游资金) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.green}`, paddingLeft: '8px' }}>
-            5. SUPPLY CHAIN MOAT (正负零轴：净占用上下游资金差额)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <BarChart data={data} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`} />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                
-                {/* 采用正负柱状图，直观体现话语权切换 */}
-                <Bar 
-                  dataKey="net_supply_chain_capital_occupied" 
-                  name="净占用上下游资金" 
-                  maxBarSize={45}
-                  // 动态颜色：正数白嫖显绿色，负数受气显红色
-                  shape={(props) => {
-                    const { x, y, width, height, value } = props;
-                    const isPositive = value >= 0;
-                    const fill = isPositive ? BB_COLORS.green : BB_COLORS.red;
-                    // 修复负值渲染
-                    const rectY = isPositive ? y : y + height;
-                    const rectHeight = Math.abs(height);
-                    return <rect x={x} y={rectY} width={width} height={rectHeight} fill={fill} opacity={0.8} />;
-                  }}
-                />
-                <ReferenceLine y={0} stroke="#FFFFFF" strokeWidth={1} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 6-1: 库存周转效率 (双Y轴：折线=周转率，柱状=库存) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
-            6-1. INVENTORY TURNOVER (库存周转率 & 库存金额)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: -25, left: -10, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`}/>
-                <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.amber} tick={{ fontSize: 11 }} />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-
-                {/* 柱状图 - 库存金额（左轴） */}
-                <Bar yAxisId="left" dataKey="inventory" name="库存金额" fill={BB_COLORS.blue} barSize={20} opacity={0.7} />
-                
-                {/* 折线图 - 库存周转率（右轴） */}
-                <Line type="linear" yAxisId="right" dataKey="inventory_turnover" name="库存周转率(次)" stroke={BB_COLORS.amber} strokeWidth={3} dot={{ r: 4 }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 6-2: 应收账款周转效率 (双Y轴：折线=周转率，柱状=应收账款) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.purple}`, paddingLeft: '8px' }}>
-            6-2. ACCOUNTS RECEIVABLE TURNOVER (应收周转率 & 应收账款)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: -25, left: -10, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`}/>
-                <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.amber} tick={{ fontSize: 11 }} />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-
-                {/* 柱状图 - 应收账款（左轴） */}
-                <Bar yAxisId="left" dataKey="ar_and_br" name="应收账款" fill={BB_COLORS.blue} barSize={20} opacity={0.7} />
-                
-                {/* 折线图 - 应收周转率（右轴） */}
-                <Line type="linear" yAxisId="right" dataKey="ar_turnover" name="应收账款周转率(次)" stroke={BB_COLORS.amber} strokeWidth={3} dot={{ r: 4 }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 7. 三大核心利润率走势 (ROE、毛利率、净利率走势图) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.amber}`, paddingLeft: '8px' }}>
-            5. PROFITABILITY MARGIN TRENDS (净资产收益率、毛利率、净利率 %)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <LineChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} unit="%" />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                
-                {/* 三线叠加，通过高对比度颜色看盈利效率的剪刀差 */}
-                <Line type="linear" dataKey="roe" name="净资产收益率(ROE %)" stroke={BB_COLORS.amber} strokeWidth={1.5} dot={{ r: 2.5 }} />
-                <Line type="linear" dataKey="gross_margin" name="营业毛利率(%)" stroke={BB_COLORS.blue} strokeWidth={1.5} dot={{ r: 2.5 }} />
-                <Line type="linear" dataKey="net_profit_margin" name="营业净利率(%)" stroke={BB_COLORS.cyan} strokeWidth={1.5} dot={{ r: 2.5 }} />
-                <ReferenceLine y={0} stroke="#FFFFFF" opacity={0.3} />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 8. 核心利润 与 净利润 对比图 (柱线混排，看非经常损益或利息的剥离) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.green}`, paddingLeft: '8px' }}>
-            8. CORE PROFIT VS NET PROFIT (核心主营利润与最终净利润对比)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`} />
-                <Tooltip content={<BloombergTooltip />} formatter={(val, name) => [`${toBillion(val)} 亿元`, name]}/>
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                
-                {/* 核心利润用柱状充当体量背景，净利润用高亮绿线穿梭，若绿线远低于柱状，说明存在大额营业外减值或利息剥离 */}
-                <Bar dataKey="core_profit" name="核心主营利润" fill={BB_COLORS.blue} opacity={0.4} maxBarSize={45} />
-                <Line type="monotone" dataKey="net_profit_atsopc" name="归母净利润" stroke={BB_COLORS.green} strokeWidth={2.5} dot={{ r: 4 }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 9. 资产状况：固定资产、无形资产与总资产 (专业堆叠图) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.cyan}`, paddingLeft: '8px' }}>
-            9. ASSET COMPOSITION ANALYSIS (总资产重轻资产分布结构)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 20, left: -15, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`}/>
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                
-                {/* 采用堆叠Bar展示固定与无形，用虚线绳索牵引总资产顶端，一眼看出重资产扩张速度 */}
-                <Bar dataKey="fixed_asset_sum" stackId="asset_stack" name="固定资产" fill={BB_COLORS.asset2} maxBarSize={45} />
-                <Bar dataKey="intangible_assets" stackId="asset_stack" name="无形资产" fill={BB_COLORS.asset3} maxBarSize={45} />
-                <Line type="linear" dataKey="total_assets" name="总资产" stroke={BB_COLORS.textMain} strokeWidth={1.5} strokeDasharray="4 4" dot={{ r: 2 }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 10. 负债状况：有息负债与总负债 (透视核心债务风险) */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
-            10. DEBT RISK PROFILE (有息负债占总负债比重与违约隐患)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: 10, left: -15, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(val) => `${toBillion(val)}亿`}/>
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                
-                {/* 有息负债（通常包含短期借款 st_loan、长期借款等）用深浅不同的红色堆叠和衬托，看刚性债务占比 */}
-                <Bar dataKey="interest_bearing_liab" name="有息负债" fill={BB_COLORS.liab2} maxBarSize={45} />
-                <Line type="linear" dataKey="total_liab" name="总负债" stroke={BB_COLORS.red} strokeWidth={2} dot={{ r: 3 }} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* 11: 利息保障倍数（EBITDA / 利息费用），衡量盈利对利息的覆盖能力，越高越安全 */}
-        <div className="bb-card">
-          <h2 style={{ fontSize: '14px', margin: '0 0 15px 0', color: BB_COLORS.text, borderLeft: `3px solid ${BB_COLORS.red}`, paddingLeft: '8px' }}>
-            11. 利息保障倍数（EBITDA / 利息费用）, (衡量盈利对利息的覆盖能力)
-          </h2>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart data={data} margin={{ top: 10, right: -20, left: -20, bottom: 0 }}>
-                <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
-                <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
-                <YAxis yAxisId="left" stroke={BB_COLORS.blue} tick={{ fontSize: 11 }} />
-                <YAxis yAxisId="right" orientation="right" stroke={BB_COLORS.red} tick={{ fontSize: 11 }} />
-                <Tooltip content={<BloombergTooltip />} />
-                <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
-                <Area yAxisId="left" type="monotone" dataKey="interest_coverage_ratio" name="利息保障倍数" fill={BB_COLORS.blue} stroke={BB_COLORS.blue} fillOpacity={0.15} />
-                <Line yAxisId="right" type="monotone" dataKey="asset_liab_ratio" name="资产负债率(%)" stroke={BB_COLORS.red} strokeWidth={0.5} dot={{ r: 2 }} />
-                <ReferenceLine y={1} stroke={BB_COLORS.blue} strokeWidth={1} opacity={0.4} />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
+      <div className="chart-tabs" role="tablist" aria-label="财务分析维度">
+        {TABS.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            className={`chart-tab${activeTab === tab.id ? ' chart-tab-active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <span className="chart-tab-label">{tab.label}</span>
+            <span className="chart-tab-en">{tab.en}</span>
+          </button>
+        ))}
       </div>
 
-      {/* 底部免责与彭博控制台命令行提示 */}
-      <div className="mt-5 flex flex-col gap-1 border-t border-white/5 pt-3 text-[11px] text-slate-500 sm:flex-row sm:justify-between">
-        <span>BBG-ANALYST-ID: 998273 // INDUSTRIAL_VIEW_MODEL_V2</span>
-        <span>GO TO FINANCIAL ANALYSIS RUN [ENTER]</span>
+      <div className="chart-grid">
+        {tabContent[activeTab]?.()}
       </div>
     </div>
   );

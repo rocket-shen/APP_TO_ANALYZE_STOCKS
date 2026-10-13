@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 import FinancialDashboard from './FinancialDashboard';
 import LoginPage from './components/auth/LoginPage';
 import { fetchAuthMe, logout as apiLogout } from './services/api';
@@ -60,8 +61,11 @@ const App = () => {
 
   if (checking) {
     return (
-      <div className="min-h-screen bg-[#0a0f1c] text-slate-400 flex items-center justify-center">
-        正在检查登录状态…
+      <div className="app-shell flex min-h-screen items-center justify-center px-4 text-slate-400">
+        <div className="glass-panel flex flex-col items-center gap-3 rounded-2xl px-8 py-7">
+          <Loader2 className="h-6 w-6 animate-spin text-cyan-300" />
+          <p className="text-sm tracking-wide">正在检查登录状态…</p>
+        </div>
       </div>
     );
   }

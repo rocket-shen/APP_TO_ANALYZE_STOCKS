@@ -27,6 +27,10 @@ class Settings(BaseSettings):
     OUTPUT_JSON_DIR: Path = BASE_DIR / "data" / "output"
 
     FINANCIAL_FIELDS_JSON: Path = BASE_DIR / "config" / "financial_fields.json"
+    # view_financial_data_industrial 当前 46 列的中文字段映射
+    INDUSTRIAL_FIELDS_ZH_JSON: Path = (
+        BASE_DIR / "config" / "view_financial_data_industrial_zh.json"
+    )
     SQL_DIR: Path = BASE_DIR / "app" / "queries"
 
     XUEQIU_REFERER: str = "https://xueqiu.com/"
@@ -56,6 +60,7 @@ class Settings(BaseSettings):
         "STOCK_DICT_A_PATH",
         "OUTPUT_JSON_DIR",
         "FINANCIAL_FIELDS_JSON",
+        "INDUSTRIAL_FIELDS_ZH_JSON",
         "SQL_DIR",
         mode="before",
     )

@@ -117,6 +117,15 @@ financial_indicators AS (
             WHEN total_assets > 0 THEN ROUND((total_liab / total_assets) * 100, 2)
         END AS asset_liab_ratio,
 
+        -- [有息负债率：有息负债 / 总资产]
+        CASE
+            WHEN total_assets > 0 THEN ROUND(
+                (COALESCE(st_loan, 0) + COALESCE(noncurrent_liab_due_in1y, 0)
+                 + COALESCE(lt_loan, 0) + COALESCE(bond_payable, 0))
+                / total_assets * 100
+            , 2)
+        END AS interest_bearing_liab_ratio,
+
         -- [精确修正：ROE（使用平均股东权益）]
         CASE 
             WHEN total_quity_atsopc > 0 AND prev_total_quity_atsopc > 0 

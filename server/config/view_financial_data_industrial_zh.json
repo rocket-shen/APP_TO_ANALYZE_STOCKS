@@ -22,6 +22,7 @@
   "intangible_assets": "无形资产",
   "interest_bearing_liab": "有息负债",
   "asset_liab_ratio": "资产负债率",
+  "interest_bearing_liab_ratio": "有息负债率",
   "net_cash_flow_operating": "经营活动现金流量净额",
   "free_cash_flow": "自由现金流",
   "asset_impairment_loss": "资产减值损失",

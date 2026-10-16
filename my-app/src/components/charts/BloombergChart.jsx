@@ -366,6 +366,25 @@ export default function BloombergChart({ data }) {
       </div>
 
       <div className="bb-card">
+        <CardTitle color={BB_COLORS.liab2}>
+          有息负债率 INTEREST_BEARING_LIAB_RATIO (%)
+        </CardTitle>
+        <div style={{ width: '100%', height: 300 }}>
+          <ResponsiveContainer>
+            <LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <CartesianGrid stroke={BB_COLORS.grid} strokeDasharray="3 3" />
+              <XAxis dataKey="report_date" stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={formatXAxis} />
+              <YAxis stroke={BB_COLORS.text} tick={{ fontSize: 11 }} tickFormatter={(v) => `${v}%`} />
+              <Tooltip content={<BloombergTooltip />} />
+              <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+              <ReferenceLine y={40} stroke={BB_COLORS.liab2} strokeDasharray="4 4" strokeWidth={1} opacity={0.55} label={{ value: '40%', fill: BB_COLORS.liab2, fontSize: 10 }} />
+              <Line type="monotone" dataKey="interest_bearing_liab_ratio" name="有息负债率(%)" stroke={BB_COLORS.liab2} strokeWidth={2} dot={{ r: 3 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      <div className="bb-card">
         <CardTitle color={BB_COLORS.cyan}>
           现金比率 CASH_RATIO ((货币资金+交易性金融资产)/流动负债)
         </CardTitle>

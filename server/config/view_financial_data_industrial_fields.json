@@ -44,6 +44,7 @@
     "cash_paid_for_assets": "购建固定资产、无形资产和其他长期资产支付的现金 (Cash Paid to Acquire Fixed Assets)",
     "net_cash_of_disposal_assets": "处置固定资产、无形资产和其他长期资产收回的现金净额 (Net Cash Received from Disposal of Assets)",
     "asset_liab_ratio": "资产负债率 (%) (Asset-Liability Ratio)",
+    "interest_bearing_liab_ratio": "有息负债率 (%) (Interest-Bearing Liability Ratio)",
     "roe": "净资产收益率 (%) [基于平均股东权益修正] (Return on Equity)",
     "gross_margin": "营业毛利率 (%) (Gross Profit Margin)",
     "net_profit_margin": "销售净利率 (%) (Net Profit Margin)",
